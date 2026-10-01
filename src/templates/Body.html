@@ -1,0 +1,129 @@
+<script src="/formatter.js"></script>
+<script src="/script.js"></script>
+<section class="root">
+	<section class="main">
+		<div class="activity">
+			<#? content ?#>
+		</div>
+	</section>
+
+	<div class="popover" id="PopOver_ProfileMenu">
+		<div id="Grid_Account">
+			<div class="avatar" id="Grid_Avatar" ad-tooltip="Ganti Avatar">
+				<div class="progressring"></div>
+				<img id="Image_GridAvatar" src="/api/avatar/<#? activeuser.member.id_user ?#>"/>
+			</div>
+			<div class="details">
+				<div class="name"><#? activeuser.member.nama_user ?#></div>
+				<div class="description">@<#? activeuser.member.username ?#></div>
+				<button id="Button_SignOut" class="critical plain">Keluar</button>
+			</div>
+		</div> 
+	</div>
+</section>
+<script>
+    if ("<#? activeuser.member.id_user ?#>") {
+        Image_Avatar.src = "/api/avatar/<#? activeuser.member.id_user ?#>";
+        Button_Account.classList.remove("hidden");
+		Button_Account.onclick = function() {
+			PopOver_ProfileMenu.open(this);
+		}
+        Button_SignIn.remove();
+    } 
+    else {
+        Button_Account.remove();
+    }
+
+    Button_SignOut.onclick = function() {
+        Components.ActionSheet.Open({
+            Title: "Apakah Anda yakin ingin keluar?",
+            Description: "Anda bisa masuk lagi kapan saja.",
+            Actions: [
+                { 
+                    Title: "Keluar", Type: "Options.Critical", 
+                    Action: function() {
+                        return new Promise(function() {
+                            window.location.href = "/signout";
+                        });
+                    }
+                },
+                { 
+                    Title: "Batal", Type: "Footer"
+                }
+            ]
+        });     
+    }
+
+    Grid_Avatar.onclick = function() {
+        const file = document.createElement("input");
+        file.type = "file";
+        file.accept = ".png, .jpg, .jpeg, .webp";
+        file.oninput = function() {
+            const files = Array.from(this.files);
+
+            if (files.length == 0)
+                return;
+
+            if (files[0].size > 3000000)
+                return Components.Notification.Send({ 
+                    Id: "avatar_failed", 
+                    Title: "Gagal Mengubah Avatar", 
+                    Message: "Ukuran foto tidak boleh lebih besar dari 3 MB.", 
+                    Icon: "\ufe64", 
+                    Buttons: [
+                        {
+                            Text: "Tutup"
+                        }
+                    ] 
+                });
+                
+            const form = new FormData();
+            form.append("file", files[0]);
+
+            Image_GridAvatar.parentNode.classList.add("loading");
+
+            $.ajax({
+                type: "POST",
+                url: "/api/avatar/member",
+                data: form,
+                contentType: false,
+                processData: false,
+                success: async function() {
+                    const url = "/api/avatar/<#? activeuser.member.id_user ?#>?cache=false&time=" + Date.now();
+
+                    const avatars = document.querySelectorAll("img[src^='/api/avatar/<#? activeuser.member.id_user ?#>']");
+                    for (const avatar of avatars) {
+                        avatar.src = url;
+                        avatar.onload = function() {
+                            Components.Notification.Remove({ Id: "avatar_failed" });
+                            Components.Notification.Send({ 
+                                Id: "avatar_success", 
+                                Title: "Berhasil Mengubah Avatar", 
+                                Message: "Avatar telah diubah.", 
+                                Icon: "\uf873"
+                            });
+                            
+                            if (avatar == Image_GridAvatar)
+                                Image_GridAvatar.parentNode.classList.remove("loading");   
+                        };
+                    }
+                },
+                error: function(error) {               
+                    Components.Notification.Send({ 
+                        Id: "avatar_failed", 
+                        Title: "Gagal Mengubah Avatar", 
+                        Message: error.responseText || "Ada yang salah dengan server. Coba lagi nanti.", 
+                        Icon: "\ufe64", 
+                        Buttons: [
+                            {
+                                Text: "Tutup"
+                            }
+                        ] 
+                    });
+                    Image_GridAvatar.parentNode.classList.remove("loading");    
+                }
+            });
+        }
+        file.click();
+	}
+</script>

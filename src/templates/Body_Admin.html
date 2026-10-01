@@ -1,0 +1,20 @@
+<header class="titlebar">
+	<img class="icon" src="<#? appiconmonochrome ?#>"/>
+	<span class="name"><#? apptitleadmin ?#></span>
+</header>
+<div class="root">
+	<nav class="sidebar">
+		<#? navigation ?#>
+	</nav>
+	<script src="/formatter.js" id="admin_js"></script>
+	<script src="/admin.js" id="admin_js"></script>
+	<section class="main">
+		<div class="activity" id="Activity_Main">
+			<#? content ?#>
+		</div>
+		<div class="activity" id="Activity_Secondary">
+			<div class="header"></div>
+			<div class="content"></div>
+		</div>
+	</section>
+</div>
