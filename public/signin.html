@@ -1,0 +1,152 @@
+<ad-title>Masuk</ad-title>
+
+<style>
+    .root
+    {
+        background-image: url("/assets/background_auth.webp");
+        background-size: cover;
+        background-color: #4269AE;
+        grid-auto-columns: auto;
+        grid-auto-rows: auto;
+        grid-template-areas: "Content";
+    }
+    .panel
+    {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        display: grid;
+        grid-auto-flow: row;
+        transform: translate(-50%, -50%);
+        background: var(--gray-6);
+        padding: 33px 30px;
+        border-radius: 25px;
+        border: 1px solid var(--overlay-6);
+        gap: 0.3em;
+        width: 350px;
+        box-shadow: 0 5px 35px 0px rgba(0, 0, 0, 0.075);
+    }
+        .panel img
+        {
+            height: 1.55em;
+        }
+        .panel .title
+        {
+            font-size: 1.75em;
+            font-family: var(--font-bold);
+            margin: 0.25em 0 0;
+        }
+        .panel .subtitle
+        {
+            font-size: 1.25em;
+            margin: 0 0 25px;
+        }
+        .panel .inputs
+        {
+            display: grid;
+            gap: 7px;
+        }
+            .panel .inputs button
+            {
+                padding: 0.6em 0.8em;
+            }
+            .panel .inputs .error 
+            {
+                display: none;
+                color: var(--notice);
+                text-align: center;
+                margin: 0.5em 0 0 0;
+                font-size: 0.9em;
+            }
+            .panel .inputs button
+            {
+                margin: 25px 0 0;
+            }
+                .panel .inputs button .progressring
+                {
+                    width: 1em;
+                    height: 1em;
+                }
+                .panel:not(.loading) .inputs button .progressring
+                {
+                    display: none;
+                }
+            .panel .inputs .suggestion {
+                margin-top: 1em;
+                text-align: center;
+            }
+</style>
+
+<div class="panel" theme="light" accent="blue">
+    <img src="<#? appicon ?#>" ad-goto="/"/>
+    <div class="title"><#? apptitle ?#></div>
+    <div class="subtitle">Masuk sebagai member untuk memulai penyewaan mobil favoritmu.</div>
+    <div class="inputs">
+        <input type="text" id="Input_Username" ad-text="Username" name="username" autofocus/>
+        <input type="password" id="Input_Password" ad-text="Kata Sandi" name="password"/>
+        <span class="error"></span>
+        <button class="accent" id="Button_SignIn" disabled>
+            <div class="progressring"></div>
+            <span>Masuk</span>
+        </button>
+        <div class="suggestion">
+            Belum punya akun?
+            <a class="link" ad-goto="/signup">Daftar</a>
+        </span>
+    </div>
+</div>
+
+<script>
+    $(".titlebar").remove();
+    $("nav").remove();
+    $(".loading").hide();
+
+    Button_SignIn.onclick = SignIn;
+    
+    Input_Username.oninput = InputCheck;
+    Input_Password.oninput = InputCheck;
+
+    Input_Username.onkeydown = InputEnter;
+    Input_Password.onkeydown = InputEnter;
+
+    function InputCheck() {
+        if (Input_Username.value.trim() != "" && Input_Password.value.trim() != "")
+            Button_SignIn.disabled = false;
+        else
+            Button_SignIn.disabled = true;
+    }
+    function InputEnter(e) {
+        if (e.key == "Enter") {
+            if (this == Input_Username)
+                Input_Password.focus();
+            else if (this == Input_Password)
+                SignIn();
+        }
+    }
+
+    function SignIn() {
+        $(".panel").addClass("loading");
+        $(".panel .inputs .error").hide();
+        $(".panel .inputs input, .panel .inputs button").attr("disabled", "");
+        $.ajax
+        ({
+            url: "/api/signin",
+            type: "POST",
+            data: 
+            { 
+                username: Input_Username.value, 
+                password: Input_Password.value
+            },
+            success: function(data) {
+                window.location.replace(data.url);
+            },
+            error: function(data, err) {
+                $(".panel").removeClass("loading");
+                $(".panel .inputs input, .panel .inputs button").removeAttr("disabled");
+                $(".panel .inputs .error").html(data.responseText ? data.responseText : "Ada yang salah dengan server. Coba lagi nanti.");
+                $(".panel .inputs .error").show();
+                Input_Username.focus();
+            }
+        });
+    }
+</script>

@@ -1,0 +1,1133 @@
+<ad-title>Katalog - Admin</ad-title>
+
+<style>
+    section[ad-header].blur {
+        pointer-events: none;
+    }
+        section[ad-header].blur .item * {
+            color: var(--foreground-description) !important;
+        }
+    .items {
+        transition: 0.25s opacity !important;
+        --thumbnail-height: 155px;
+    }
+    .items.loading {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+        .items .progressring {
+            margin: 0 auto;
+            width: 25px;
+        }
+        .items .thumbnail {
+            object-fit: cover;
+        }
+
+    .items#Content_Type {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 25px;
+    }
+        .items#Content_Type .item {
+            position: relative;
+            grid-auto-flow: column;
+            grid-auto-columns: auto max-content;
+        }  
+                .items#Content_Type .item .primary {
+                    font-size: 1em;
+                    font-weight: normal;
+                    color: var(--text);
+                }
+                .items#Content_Type .item .details {
+                    margin: 0.25em 0 0;
+                }
+                .items#Content_Type .item button {
+                    padding: 0;
+                }
+                .items#Content_Type .item::after {
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    bottom: -3px;
+                    left: 10px;
+                    right: 10px;
+                    height: 1px;
+                    background-color: var(--border-context);
+                }
+
+        .items#Content_Car .header {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: auto max-content;
+        }
+            .items#Content_Car .header button {
+                color: var(--accent);
+                margin: -1em -0.5em -1em 0;
+            }
+
+    #PopOver_NewType .content .stack,
+    #PopOver_EditType .content .stack {
+        grid-auto-columns: 100px auto;
+    }
+
+    #PopOver_MoveToType .notice {
+        display: grid;
+        gap: 1em;
+        margin-bottom: 1em;
+    }
+
+    #PopOver_EditCar {
+        
+    }
+        #PopOver_EditCar .thumbnail {
+            position: relative;
+            display: grid;
+            width: calc(100% + 2 * var(--padding));
+            background: var(--gray-4);
+            margin: calc(var(--padding) * -2 - 1.15em - 15px) calc(var(--padding) * -1) var(--padding);
+        }
+            #PopOver_EditCar .thumbnail #Image_EditCarThumbnail {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 4/3;
+                object-fit: cover;
+                filter: brightness(0.6);
+            }
+            #PopOver_EditCar .thumbnail #Button_EditCarThumbnail {
+                position: absolute;
+                bottom: var(--padding);
+                right: var(--padding);
+                color: var(--text);
+                padding: 0;
+            }
+        #PopOver_NewCar .list.details .stack,
+        #PopOver_EditCar .list.details .stack {
+            grid-auto-columns: 7em auto;
+        }
+        #PopOver_NewCar .list.price .stack,
+        #PopOver_EditCar .list.price .stack:not(#Stack_ViewPriceHistory) {
+            grid-auto-columns: 9.5em auto;
+        }
+        #PopOver_EditCar #Content_PriceHistory .progressring {
+            margin: var(--padding) auto 0;
+            width: 25px;
+        }
+        #PopOver_EditCar .list.price .stack#Stack_ViewPriceHistory span,
+        #Content_PriceHistory .list .stack span {
+            font-weight: normal;
+        }
+        #Content_PriceHistory .list .stack span:first-child {
+            color: var(--foreground-description);
+        }
+
+</style>
+
+<section id="Section_Main">
+    <div class="header">
+        <div class="title">Katalog</div>
+        <div class="buttons">
+            <button id="Button_Add">Tambah</button>
+            <button id="Button_Filter" class="icon" ad-tooltip="Filter berdasarkan...">&#xf5bf;</button>
+        </div>
+        <input id="Input_Search" type="search" placeholder="Cari nama mobil, jenis mobil, atau cabang kota"/>
+    </div>
+
+    <div class="content">
+        <section ad-header="Jenis" id="Section_Type">
+            <div class="progressring" id="Loading_Type"></div>
+            <div class="items" id="Content_Type"></div>
+        </section>
+        <section ad-header="Mobil">
+            <div class="progressring" id="Loading_Car"></div>
+            <div class="items" id="Content_Car"></div>
+        </section>
+    </div>
+</section>
+
+<div id="PopOver_NewType" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelNewType">Batal</button>
+                <button id="Button_SubmitNewType">
+                    <div class="progressring"></div>
+                    <span>Tambah</span>
+                </button>
+            </div>
+            <span class="title">Jenis Mobil Baru</span>
+        </div>
+        <div class="content">
+            <div class="list">
+                <div class="stack">
+                    <span>Nama</span>
+                    <input type="text" id="Input_NewTypeName" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Kapasitas</span>
+                    <input type="number" id="Input_NewTypeCapacity" class="plain"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="PopOver_EditType" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelEditType">Batal</button>
+                <button id="Button_SubmitEditType">
+                    <div class="progressring"></div>
+                    <span>Simpan</span>
+                </button>
+            </div>
+            <span class="title">Edit Jenis Mobil</span>
+        </div>
+        <div class="content">
+            <div class="list">
+                <div class="stack">
+                    <span>Nama</span>
+                    <input type="text" id="Input_EditTypeName" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Kapasitas</span>
+                    <input type="number" id="Input_EditTypeCapacity" class="plain"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="PopOver_MoveToType" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelMoveToType">Batal</button>
+                <button id="Button_SubmitMoveToType">
+                    <div class="progressring"></div>
+                    <span>Lanjut</span>
+                </button>
+            </div>
+            <span class="title">Pindah Mobil ke...</span>
+        </div>
+        <div class="content">
+            <div class="notice">
+                <div>Jenis Mobil <span id="Text_MoveToTypeName"></span> masih memiliki beberapa mobil.</div>
+                <div>Silakan lakukan penghapusan mobil secara manual yang merupakan jenis mobil tersebut atau pindahkan ke jenis mobil lain terlebih dahulu.</div>
+            </div>
+            <div class="list">
+                <div class="stack">
+                    <span>Jenis Mobil Baru</span>
+                    <select id="Select_MoveToType" class="plain">
+                        <option value="">Pilih...</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="popover" id="PopOver_NewCar">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="title">Mobil Baru</div>
+            <div class="buttons">
+                <button id="Button_CancelNewCar">Batal</button>
+                <button id="Button_SubmitNewCar">
+                    <div class="progressring"></div>
+                    <span>Tambah</span>
+                </button>
+            </div>
+        </div>
+        <div class="content">
+            <div class="list details">
+                <div class="stack">
+                    <span>Nama Mobil</span>
+                    <input id="Input_NewCarName" type="text" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Plat Nomor</span>
+                    <input id="Input_NewCarNumber" type="text" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Jenis Mobil</span>
+                    <select id="Select_NewCarType" type="text" class="plain">
+                        <option value="">Pilih...</option>
+                    </select>
+                </div>
+                <div class="stack">
+                    <span>Cabang</span>
+                    <select id="Select_NewCarBranch" type="text" class="plain">
+                        <option value="">Pilih...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="list price">
+                <div class="stack">
+                    <span>Biaya Sewa Harian</span>
+                    <input id="Input_NewCarDailyFee" type="text" ad-type="currency" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Biaya Denda Harian</span>
+                    <input id="Input_NewCarDailyFine" type="text" ad-type="currency" class="plain"/>
+                </div>
+            </div>
+        </div>   
+    </div>
+</div>
+
+<div class="popover" id="PopOver_EditCar">
+    <div class="activity">
+        <section>
+            <div class="header cascaded">
+                <div class="title hide">Edit Mobil</div>
+                <div class="buttons dynamic" theme="dark">
+                    <button id="Button_CancelEditCar">Batal</button>
+                    <button id="Button_SubmitEditCar">
+                        <div class="progressring"></div>
+                        <span>Simpan</span>
+                    </button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="thumbnail" theme="dark">
+                    <img id="Image_EditCarThumbnail"/>
+                    <button id="Button_EditCarThumbnail" class="plain icon">&#xf7cf;</button>
+                </div>
+                <div class="list details">
+                    <div class="stack">
+                        <span>Nama Mobil</span>
+                        <input id="Input_EditCarName" type="text" class="plain"/>
+                    </div>
+                    <div class="stack">
+                        <span>Plat Nomor</span>
+                        <input id="Input_EditCarNumber" type="text" class="plain"/>
+                    </div>
+                    <div class="stack">
+                        <span>Jenis Mobil</span>
+                        <select id="Select_EditCarType" type="text" class="plain"></select>
+                    </div>
+                    <div class="stack">
+                        <span>Cabang</span>
+                        <select id="Select_EditCarBranch" type="text" class="plain"></select>
+                    </div>
+                </div>
+                <div class="list price">
+                    <div class="stack">
+                        <span>Biaya Sewa Harian</span>
+                        <input id="Input_EditCarDailyFee" type="text" ad-type="currency" class="plain"/>
+                    </div>
+                    <div class="stack">
+                        <span>Biaya Denda Harian</span>
+                        <input id="Input_EditCarDailyFine" type="text" ad-type="currency" class="plain"/>
+                    </div>                    
+                    <div class="stack clickable" id="Stack_ViewPriceHistory">
+                        <span>Riwayat Perubahan Harga</span>
+                        <span class="icon">&#xef59;</span>
+                    </div>
+                </div>
+            </div>   
+        </section>
+        <section>
+            <div class="header cascaded">
+                <div class="title">Perubahan Harga</div>
+            </div>
+            <div class="content" id="Content_PriceHistory">
+                <div class="progressring" id="Loading_PriceHistory"></div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    registerInput(
+        [Input_NewTypeName, Input_NewTypeCapacity], 
+        Button_CancelNewType, Button_SubmitNewType, PopOver_NewType
+    );
+
+    registerInput(
+        [Input_EditTypeName, Input_EditTypeCapacity], 
+        Button_CancelEditType, Button_SubmitEditType, PopOver_EditType
+    );
+
+    registerInput(
+        [Select_MoveToType], 
+        Button_CancelMoveToType, Button_SubmitMoveToType, PopOver_MoveToType);
+    
+    registerInput(
+        [
+            Input_NewCarName, Input_NewCarNumber, Select_NewCarType, 
+            Select_NewCarBranch, Input_NewCarDailyFee, 
+            Input_NewCarDailyFine
+        ], 
+        Button_CancelNewCar, Button_SubmitNewCar, PopOver_NewCar);
+
+    registerInput(
+        [
+            Input_EditCarName, Input_EditCarNumber, Select_EditCarType, 
+            Select_EditCarBranch, Input_EditCarDailyFee, 
+            Input_EditCarDailyFine
+        ], 
+        Button_CancelEditCar, Button_SubmitEditCar, PopOver_EditCar);
+
+    Button_Add.onclick = function(event) {
+        Components.ContextMenu.Open("menu_add", this, event);
+    }
+
+    Button_SubmitNewType.onaction = function() {
+        return new Promise(async function(resolve) {
+            await $.ajax({
+                type: "POST",
+                url: "/api/car/type",
+                data: {
+                    nama_jenis_mobil: Input_NewTypeName.value,
+                    kapasitas_penumpang: Input_NewTypeCapacity.value
+                },
+                success: async function(data) {
+                    await fetchTypes();
+                    appendCars(await fetchCars());
+                    resolve(true);
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "add_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Menambah Jenis Mobil",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    });
+                }
+            });
+        });
+    }
+    Button_SubmitEditType.onaction = function() {
+        return new Promise(async function(resolve) {
+            await $.ajax({
+                type: "PUT",
+                url: "/api/car/type",
+                data: {
+                    id_jenis_mobil: PopOver_EditType.data.id_jenis_mobil,
+                    nama_jenis_mobil: Input_EditTypeName.value,
+                    kapasitas_penumpang: Input_EditTypeCapacity.value
+                },
+                success: async function(data) {
+                    await fetchTypes();
+                    resolve(true);
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "add_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Menambah Jenis Mobil",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    });
+                }
+            });
+        });
+    }
+
+    Content_Car.clearItems =
+    Content_Type.clearItems = function() {
+        for (const child of [...this.children])
+            if (child.classList.contains("item"))
+                child.remove();
+    }
+
+    Button_EditCarThumbnail.onclick = function() {
+        const file = document.createElement("input");
+        file.type = "file";
+        file.accept = ".png, .jpg, .jpeg, .webp";
+        file.oninput = function() {
+            const files = Array.from(this.files);
+
+            if (files.length == 0)
+                return;
+
+            if (files[0].size > 3000000)
+                return Components.Notification.Send({ 
+                    Id: "thumbnail_failed", 
+                    Title: "Gagal Mengubah Thumbnail", 
+                    Message: "Ukuran foto tidak boleh lebih besar dari 3 MB.", 
+                    Icon: "\ufe64", 
+                    Buttons: [
+                        {
+                            Text: "Tutup"
+                        }
+                    ] 
+                });
+                
+            const form = new FormData();
+            form.append("file", files[0]);
+
+            PopOver_EditCar.isloading = true;
+
+            $.ajax({
+                type: "POST",
+                url: "/api/thumbnail/car/" + PopOver_EditCar.editedElement.data.plat_nomor,
+                data: form,
+                contentType: false,
+                processData: false,
+                success: async function() {
+                    const url = "/api/thumbnail/car/" + PopOver_EditCar.editedElement.data.plat_nomor.replaceAll(" ", "") + "?cache=false&time=" + Date.now();
+                    Image_EditCarThumbnail.src = 
+                    PopOver_EditCar.editedElement.thumbnailElement.src = url;
+                    PopOver_EditCar.editedElement.thumbnailElement.onload = function() {
+                        Components.Notification.Remove({ Id: "thumbnail_failed" });
+                        Components.Notification.Send({ 
+                            Id: "thumbnail_success", 
+                            Title: "Berhasil Mengubah Thumbnail", 
+                            Message: "Thumbnail telah diubah.", 
+                            Icon: "\uf873"
+                        });
+                        PopOver_EditCar.isloading = false;   
+                    };
+                },
+                error: function(error) {               
+                    Components.Notification.Send({ 
+                        Id: "thumbnail_failed", 
+                        Title: "Gagal Mengubah Thumbnail", 
+                        Message: error.responseText || "Ada yang salah dengan server. Coba lagi nanti.", 
+                        Icon: "\ufe64", 
+                        Buttons: [
+                            {
+                                Text: "Tutup"
+                            }
+                        ] 
+                    });
+                    PopOver_EditCar.isloading = false;       
+                }
+            });
+        }
+        file.click();
+    }
+
+    Button_SubmitNewCar.onaction = function() {
+        return new Promise(async function(resolve) {
+            await $.ajax({
+                type: "POST",
+                url: "/api/car",
+                data: {
+                    plat_nomor: Input_NewCarNumber.value,
+                    id_jenis_mobil: Select_NewCarType.value, 
+                    nama_mobil: Input_NewCarName.value,
+                    biaya_sewa_harian: Input_NewCarDailyFee.valueInt, 
+                    biaya_denda_harian: Input_NewCarDailyFine.valueInt, 
+                    id_cabang: Select_NewCarBranch.value
+                },
+                success: async function(data) {
+                    await fetchTypes();
+                    appendCars(await fetchCars());
+                    resolve(true);
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "edit_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Menambahkan Mobil",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    });
+                }
+            });
+        });
+    }
+
+    Button_SubmitEditCar.onaction = function() {
+        const car = PopOver_EditCar.editedElement.data;
+        return new Promise(async function(resolve) {
+            await $.ajax({
+                type: "PUT",
+                url: "/api/car",
+                data: {
+                    plat_nomor: car.plat_nomor,
+                    plat_nomor_baru: Input_EditCarNumber.value,
+                    id_jenis_mobil: Select_EditCarType.value, 
+                    nama_mobil: Input_EditCarName.value,
+                    biaya_sewa_harian: Input_EditCarDailyFee.valueInt, 
+                    biaya_denda_harian: Input_EditCarDailyFine.valueInt, 
+                    id_cabang: Select_EditCarBranch.value
+                },
+                success: async function(data) {
+                    await fetchTypes();
+                    appendCars(await fetchCars());
+                    resolve(true);
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "edit_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Menyimpan Perubahan",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    });
+                }
+            });
+        });
+    }
+
+    Content_PriceHistory.clearItems = function() {
+        for (const child of [...this.children])
+            if (child.classList.contains("list"))
+                child.remove();   
+    }
+
+    Input_Search.oninput = function() {
+        searchCars(this.value);
+    }
+
+    window.onload = async function() {
+        await fetchTypes();
+        await fetchBranches();
+        buildFilterMenu(); 
+        appendCars(await fetchCars());
+        Loading_Car.classList.add("hidden");
+    }
+
+let currentFilterBranch = "";
+    let currentFilterType = "";
+    let currentSortBy = "nama_mobil";
+    let currentSortOrder = "asc";
+
+    Components.ContextMenu.Add("menu_filter_katalog", [
+        { Title: "Jenis Mobil", Submenu: [] },
+        { Title: "Cabang", Submenu: [] },
+        "separator",
+        { Title: "Urutkan...", Icon: "eb8b", Submenu: [] }
+    ]);
+
+    function buildFilterMenu() {
+        const context = Components.ContextMenu.List.find(o => o.id == "menu_filter_katalog");
+
+        const typeSubmenu = [{ Title: "Semua", value: "", Checked: currentFilterType == "", Action: () => setFilter("type", "") }];
+        for (const t of window.types || []) {
+            typeSubmenu.push({ Title: t.nama_jenis_mobil, value: t.id_jenis_mobil, Checked: currentFilterType == t.id_jenis_mobil, Action: () => setFilter("type", t.id_jenis_mobil) });
+        }
+        context.commands[0].Submenu = typeSubmenu;
+
+        const branchSubmenu = [{ Title: "Semua", value: "", Checked: currentFilterBranch == "", Action: () => setFilter("branch", "") }];
+        for (const b of window.branches || []) {
+            branchSubmenu.push({ Title: b.nama_cabang, value: b.id_cabang, Checked: currentFilterBranch == b.id_cabang, Action: () => setFilter("branch", b.id_cabang) });
+        }
+        context.commands[1].Submenu = branchSubmenu; 
+
+        const sortSubmenu = [
+            { Title: "Nama Mobil", value: "nama_mobil", Checked: currentSortBy == "nama_mobil", Icon: currentSortBy == "nama_mobil" ? (currentSortOrder == "asc" ? "ebd7" : "eb26") : null, Action: () => setSort("nama_mobil") },
+            { Title: "Harga Sewa", value: "biaya_sewa_harian", Checked: currentSortBy == "biaya_sewa_harian", Icon: currentSortBy == "biaya_sewa_harian" ? (currentSortOrder == "asc" ? "ebd7" : "eb26") : null, Action: () => setSort("biaya_sewa_harian") },
+            { Title: "Kapasitas Penumpang", value: "kapasitas_penumpang", Checked: currentSortBy == "kapasitas_penumpang", Icon: currentSortBy == "kapasitas_penumpang" ? (currentSortOrder == "asc" ? "ebd7" : "eb26") : null, Action: () => setSort("kapasitas_penumpang") }
+        ];
+        context.commands[3].Submenu = sortSubmenu; 
+    }
+
+    function setFilter(kind, value) {
+        if (kind == "type") currentFilterType = value;
+        if (kind == "branch") currentFilterBranch = value;
+        
+        buildFilterMenu();
+        searchCars(Input_Search.value);
+    }
+
+    function setSort(value) {
+        if (currentSortBy == value) {
+            currentSortOrder = currentSortOrder == "asc" ? "desc" : "asc";
+        } else {
+            currentSortBy = value;
+            currentSortOrder = "asc";
+        }
+        
+        buildFilterMenu();
+        searchCars(Input_Search.value);
+    }
+
+    Button_Filter.onclick = function(event) {
+        Components.ContextMenu.Open("menu_filter_katalog", this, event);
+    }
+
+    let lastKeyword = "";
+    let keywordTimeout = null;
+    
+    // Untuk mencari car berdasarkan keyword
+    async function searchCars(keyword) {
+        // Menghapus timeout supaya delay pencariannya ke-reset
+        clearTimeout(keywordTimeout);
+
+        // Keyword ditokenisasi jadi huruf kecil semua dan tanpa spasi di awal/akhir
+        keyword = keyword.toLowerCase().trim();
+        Content_Car.classList.add("loading");
+
+        // Jika kosong, maka kembali fetch seluruh daftar pegawai
+        if (keyword == "") {
+            appendCars(await fetchCars());
+            Content_Car.classList.remove("loading");
+            Section_Type.classList.remove("hidden");
+            lastKeyword = "";
+            return;
+        }
+
+        // Jika keyword sama dengan yang terakhir diketik,
+        // abaikan supaya bisa mengurangi spam request ke server
+        if (keyword == lastKeyword) {
+            Content_Car.classList.remove("loading");
+            return;
+        }
+        
+        // Dibuat timeout agar tidak langsung nembak server tiap kali user ngetik satu huruf
+        // dan mengurangi spam request
+        keywordTimeout = setTimeout(async function() {
+            appendCars(await fetchCars(keyword));
+            Section_Type.classList.add("hidden");
+            Content_Car.classList.remove("loading");
+        }, 500);
+
+        lastKeyword = keyword;
+    }
+
+    // Mengambil data daftar pegawai dari server
+    async function fetchCars(keyword = "") {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/car");
+
+        if (keyword) {
+            url.searchParams.set("search", keyword);
+        }
+        else {
+            if (currentFilterType) url.searchParams.set("type", currentFilterType);
+            if (currentFilterBranch) url.searchParams.set("branch", currentFilterBranch);
+            
+            if (currentSortBy) {
+                url.searchParams.set("sort_by", currentSortBy);
+                url.searchParams.set("sort_order", currentSortOrder);
+            }
+            
+            if (currentFilterType || currentFilterBranch)
+                Section_Type.classList.add("blur");
+            else
+                Section_Type.classList.remove("blur");
+        }
+
+        url = url.toString().replace(dummyHost, "");
+        const cars = await $.get(url);
+        return cars;
+    }
+
+    async function appendCars(cars, content = Content_Car) {
+        // Dibersihkan seluruh itemnya dari list untuk di-render dari awal
+        Content_Car.clearItems();
+        for (const car of cars) {
+            const itemElement = renderCar(car);
+            Content_Car.append(itemElement);
+        }
+    }
+
+    // Merender struktur html untuk masing-masing item cabang
+    function renderCar(car) {
+        const branch = branches.find(o => o.id_cabang == car.id_cabang);
+        const type = types.find(o => o.id_jenis_mobil == car.id_jenis_mobil);
+
+        // Bikin elemen untuk gambar thumbnail
+        const thumbnailElement = document.createElement("img");
+        thumbnailElement.src = "/api/thumbnail/car/" + car.plat_nomor.replaceAll(" ", "");
+        thumbnailElement.classList.add("thumbnail");
+
+        const typeElement = document.createElement("div");
+        typeElement.classList.add("type");
+        typeElement.innerText = type.nama_jenis_mobil;
+
+        const actionElement = document.createElement("button");
+        actionElement.classList.add("plain");
+        actionElement.classList.add("icon");
+        actionElement.innerText = "\uf153";
+        
+        const headerElement = document.createElement("div");
+        headerElement.classList.add("header");
+        headerElement.append(typeElement);
+        headerElement.append(actionElement);
+
+        // Bikin elemen untuk teks nama mobil
+        const nameElement = document.createElement("span");
+        nameElement.classList.add("primary");
+        nameElement.innerText = car.nama_mobil;
+
+        // Bikin elemen untuk teks plat nomor mobil
+        const numberElement = document.createElement("span");
+        numberElement.classList.add("secondary");
+        numberElement.innerText = car.plat_nomor;
+
+        // Bikin elemen untuk teks cabang
+        const branchElement = document.createElement("span");
+        branchElement.innerText = branch.nama_cabang;
+        branchElement.setAttribute("icon", "\uf67a");
+
+        const priceElement = document.createElement("span");
+        priceElement.innerText = Formatter.Amount(car.biaya_sewa_harian);
+        priceElement.setAttribute("icon", "\uf0f0");
+
+        const capacityElement = document.createElement("span");
+        capacityElement.innerText = type.kapasitas_penumpang;
+        capacityElement.setAttribute("icon", "\uf83e");
+        
+        const detailsElement = document.createElement("div");
+        detailsElement.classList.add("details");
+        detailsElement.append(capacityElement);
+        detailsElement.append(priceElement);
+        detailsElement.append(branchElement);
+
+        // Bikin grup untuk menyatukan teks nama dan username
+        const groupElement = document.createElement("div");
+        groupElement.classList.add("group");
+        groupElement.append(headerElement);
+        groupElement.append(nameElement);
+        groupElement.append(numberElement);
+        groupElement.append(detailsElement);
+
+        // Bikin kontainer utama untuk membungkus avatar dan grup teks
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("item");
+        itemElement.append(thumbnailElement);
+        itemElement.append(groupElement);
+        itemElement.thumbnailElement = thumbnailElement;
+        itemElement.data = car;
+        itemElement.onclick = function() {
+            const activity = PopOver_EditCar.container.children[0];
+            activity.sections[0].scrollTop = 0;
+            activity.navigateTo(0, true);
+
+            Content_PriceHistory.clearItems();
+            Stack_ViewPriceHistory.onclick = async function() {
+                activity.navigateTo(1);
+
+                if (Content_PriceHistory.children.length > 1)
+                    return;
+                
+                Loading_PriceHistory.classList.remove("hidden");
+                await fetchPriceHistory(car.plat_nomor, Content_PriceHistory);
+                Loading_PriceHistory.classList.add("hidden");
+            }
+
+            Image_EditCarThumbnail.src = "";
+
+            while (Select_EditCarType.options.length > 0)
+                Select_EditCarType.options.remove(0);
+
+            for (const currType of window.types || []) {
+                const optionElement = document.createElement("option");
+                optionElement.value = currType.id_jenis_mobil;
+                optionElement.innerText = currType.nama_jenis_mobil;
+                Select_EditCarType.options.add(optionElement);
+            }
+
+            while (Select_EditCarBranch.options.length > 0)
+                Select_EditCarBranch.options.remove(0);
+
+            for (const currBranch of window.branches || []) {
+                const optionElement = document.createElement("option");
+                optionElement.value = currBranch.id_cabang;
+                optionElement.innerText = currBranch.nama_cabang;
+                Select_EditCarBranch.options.add(optionElement);
+            }
+
+            Image_EditCarThumbnail.src = thumbnailElement.src;
+            Input_EditCarName.value = car.nama_mobil;
+            Input_EditCarNumber.value = car.plat_nomor;
+            Select_EditCarType.value = car.id_jenis_mobil;
+            Select_EditCarBranch.value = car.id_cabang;
+            Input_EditCarDailyFee.value = Formatter.Amount(car.biaya_sewa_harian);
+            Input_EditCarDailyFee.valueInt = car.biaya_sewa_harian * 1;
+            Input_EditCarDailyFine.value = Formatter.Amount(car.biaya_denda_harian);
+            Input_EditCarDailyFine.valueInt = car.biaya_denda_harian * 1;
+            PopOver_EditCar.editedElement = itemElement;
+
+            PopOver_EditCar.open(this);
+            PopOver_EditCar.onopened = null;
+            // update validitas input
+            Input_EditCarName.oninput();
+        }
+        itemElement.oncontextmenu =
+        actionElement.onclick = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            Components.ContextMenu.Open("menu_cars", itemElement, event);
+        }
+
+        return itemElement;
+    }
+
+    // Mengambil data daftar jenis mobil dari server
+    async function fetchTypes() {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/car/type");
+        url.searchParams.set("summary", 1);
+        url = url.toString().replace(dummyHost, "");
+
+        const types = await $.get(url);
+        window.types = types;
+        
+        // Dibersihkan seluruh itemnya dari list untuk di-render dari awal
+        Content_Type.clearItems();
+        for (const type of types) {
+            const itemElement = renderType(type);
+            Content_Type.append(itemElement);
+        }
+        Loading_Type.classList.add("hidden");
+    }
+    const sections = new Map();
+    function renderType(type) {
+        const nameElement = document.createElement("span");
+        nameElement.classList.add("primary");
+        nameElement.innerText = type.nama_jenis_mobil;
+        
+        const headerElement = document.createElement("span");
+        headerElement.classList.add("header");
+        headerElement.append(nameElement);
+        
+        const capacityElement = document.createElement("span");
+        capacityElement.innerText = type.kapasitas_penumpang;
+        capacityElement.setAttribute("icon", "\uf83e");
+        
+        const countElement = document.createElement("span");
+        countElement.innerText = type.banyak_mobil;
+        countElement.setAttribute("icon", "\uee57");
+        
+        const detailsElement = document.createElement("div");
+        detailsElement.classList.add("details");
+        detailsElement.append(capacityElement);
+        detailsElement.append(countElement);
+        
+        const groupElement = document.createElement("div");
+        groupElement.classList.add("group");
+        groupElement.append(headerElement);
+        groupElement.append(detailsElement);
+
+        const actionElement = document.createElement("button");
+        actionElement.classList.add("plain");
+        actionElement.classList.add("icon");
+        actionElement.innerText = "\uf153";
+
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("item");
+        itemElement.append(groupElement);
+        itemElement.append(actionElement);
+        itemElement.data = type;
+        itemElement.onclick = function() {
+            Input_EditTypeName.value = type.nama_jenis_mobil;
+            Input_EditTypeCapacity.value = type.kapasitas_penumpang;
+            PopOver_EditType.data = type;
+            PopOver_EditType.open(itemElement);
+        }
+        itemElement.oncontextmenu =
+        actionElement.onclick = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            Components.ContextMenu.Open("menu_types", itemElement, event);
+        }
+
+        return itemElement;
+    }
+
+    function deleteType(element) {
+        const type = element.data;
+        if (type.banyak_mobil == 0) {
+            confirmationDelete();
+        }
+        else {
+            // hapus yang lama
+            while (Select_MoveToType.options.length > 1)
+                Select_MoveToType.options.remove(1);
+
+            for (const currType of window.types || []) {
+                if (currType.id_jenis_mobil == type.id_jenis_mobil)
+                    continue;
+                const optionElement = document.createElement("option");
+                optionElement.value = currType.id_jenis_mobil;
+                optionElement.innerText = currType.nama_jenis_mobil;
+                Select_MoveToType.options.add(optionElement);
+            }
+
+            Text_MoveToTypeName.innerText = type.nama_jenis_mobil;
+            Select_MoveToType.value = "";
+            Button_SubmitMoveToType.onaction = function() {
+                confirmationDelete(Select_MoveToType.value);
+            };
+            PopOver_MoveToType.open(element);
+        }
+
+        function confirmationDelete(id_jenis_mobil_baru) {
+            Components.ActionSheet.Open({
+                Title: `Yakin mau menghapus ${type.nama_jenis_mobil}?`,
+                Description: `Jenis mobil "${type.nama_jenis_mobil}" akan terhapus permanen dari sistem. Mobil dengan jenis tersebut tidak akan ikut terhapus.`,
+                Actions: [
+                    {
+                        Title: "Hapus",
+                        Type: "Plain.Critical",
+                        Action: () => {            
+                            return new Promise(function(resolve) {
+                                $.ajax({
+                                    type: "DELETE",
+                                    url: "/api/car/type",
+                                    data: { 
+                                        id_jenis_mobil_lama: type.id_jenis_mobil, 
+                                        id_jenis_mobil_baru: id_jenis_mobil_baru 
+                                    },
+                                    success: async function() {
+                                        await fetchTypes();
+                                        resolve();
+                                    },
+                                    error: function(error) {
+                                        Components.Notification.Send({
+                                            Id: "delete_failed",
+                                            Icon: "\ufe60",
+                                            Title: "Gagal Menghapus Jenis Mobil",
+                                            Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                                        });
+                                        resolve();
+                                    }
+                                });
+                            }) 
+                        }
+                    },
+                    {
+                        Title: "Batal",
+                        Type: "Footer"
+                    }
+                ]
+            });
+        }
+    } 
+
+    // Mengambil data daftar cabang dari server
+    async function fetchBranches() {
+        const branches = await $.get("/api/branch");
+        window.branches = branches;
+        return branches;
+    }
+
+    // Daftar menu tambah jenis mobil
+    Components.ContextMenu.Add("menu_add", [
+        {
+            Title: "Jenis Mobil",
+            Action: function() {
+                Input_NewTypeName.value = "";
+                Input_NewTypeCapacity.value = 0;
+                PopOver_NewType.open(Button_Add);
+            }
+        },
+        {
+            Title: "Mobil",
+            Action: function() {
+                while (Select_NewCarType.options.length > 1)
+                    Select_NewCarType.options.remove(1);
+
+                for (const currType of window.types || []) {
+                    const optionElement = document.createElement("option");
+                    optionElement.value = currType.id_jenis_mobil;
+                    optionElement.innerText = currType.nama_jenis_mobil;
+                    Select_NewCarType.options.add(optionElement);
+                }
+
+                while (Select_NewCarBranch.options.length > 1)
+                    Select_NewCarBranch.options.remove(1);
+
+                for (const currBranch of window.branches || []) {
+                    const optionElement = document.createElement("option");
+                    optionElement.value = currBranch.id_cabang;
+                    optionElement.innerText = currBranch.nama_cabang;
+                    Select_NewCarBranch.options.add(optionElement);
+                }
+
+                Input_NewCarName.value =
+                Input_NewCarNumber.value = 
+                Select_NewCarType.value =
+                Select_NewCarBranch.value = "";
+                Input_NewCarDailyFee.value = Formatter.Amount(0)
+                Input_NewCarDailyFee.valueInt = 0;
+                Input_NewCarDailyFine.value = Formatter.Amount(0);
+                Input_NewCarDailyFine.valueInt = 0;
+                PopOver_NewCar.open(Button_Add);
+            }
+        }
+    ]);
+    // Daftar menu edit/hapus mobil
+    Components.ContextMenu.Add("menu_cars", [
+        {
+            Title: "Edit...",
+            Icon: "f7cf",
+            Action: function(element) {
+                element.click();
+            }
+        }
+    ]);
+    // Daftar menu edit/hapus jenis mobil
+    Components.ContextMenu.Add("menu_types", [
+        {
+            Title: "Edit...",
+            Icon: "f7cf",
+            Action: function(element) {
+                element.click();
+            }
+        },
+        {
+            Title: "Hapus...",
+            Icon: "fd3c",
+            Type: "critical",
+            Action: function(element) {
+                deleteType(element);
+            }
+        }
+    ]);
+    async function fetchPriceHistory(plat_nomor, containerElement) {
+        const changes = await $.get("/api/car/pricehistory/" + encodeURIComponent(plat_nomor)) || [];
+        
+        containerElement.clearItems();
+
+        if (changes.length == 0) {
+            const itemElement = document.createElement("div");
+            itemElement.classList.add("stack");
+            itemElement.innerText = "Belum ada riwayat perubahan harga";
+
+            const emptyListElement = document.createElement("div");
+            emptyListElement.classList.add("list");
+            emptyListElement.append(itemElement);
+            
+            return;
+        }
+        const groupedChanges = {};
+        for (const change of changes) {
+            const dateString = Formatter.Date(change.tanggal_mulai);
+            
+            if (!groupedChanges[dateString])
+                groupedChanges[dateString] = [];
+
+            groupedChanges[dateString].push(change);
+        }
+
+        for (const date in groupedChanges) {
+            const listElement = document.createElement("div");
+            listElement.classList.add("list");
+            listElement.setAttribute("ad-header", date);
+
+            for (const change of groupedChanges[date]) {
+                const itemElement = renderPriceHistory(change);
+                listElement.append(itemElement);
+            }
+
+            containerElement.append(listElement);
+        }
+    }
+
+    function renderPriceHistory(change) {
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("stack");
+
+        const typeElement = document.createElement("span");
+        const type = change.jenis_biaya.charAt(0).toUpperCase() + change.jenis_biaya.slice(1);
+        typeElement.innerText = "Biaya " + type + " Harian";
+
+        const nominalElement = document.createElement("span");
+        nominalElement.classList.add("selectable");
+        nominalElement.innerText = Formatter.Amount(change.biaya_harian);
+
+        itemElement.append(typeElement);
+        itemElement.append(nominalElement);
+
+        return itemElement;
+    }
+</script>

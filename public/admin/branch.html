@@ -1,0 +1,795 @@
+<ad-title>Cabang - Admin</ad-title>
+
+<style>
+    #List_Branch .stack {
+        grid-auto-columns: 100px auto max-content;
+    }
+        #List_Branch > *.iconed:not(:last-child):after {
+            left: calc(100px + 2.75em);
+        }
+        #List_Branch .stack .thumbnail {
+            border-radius: 7px;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: var(--gray-4);
+            border-radius: 5px;
+            border: 1px solid var(--overlay-8);
+            object-fit: cover;
+        }
+        #List_Branch .stack .group {
+            display: grid;
+            line-height: 1.15em;
+            padding: 0.4em 0;
+            grid-auto-rows: max-content calc(3 * 1.15em);
+        }
+            #List_Branch .stack .group .address {
+                color: var(--foreground-description);
+            }
+
+    [theme=light]
+    #Section_BranchInfo {
+        background: var(--background-activity-grid);
+    }
+        #Section_BranchInfo .thumbnail {
+            position: relative;
+            margin: -68px calc(var(--padding) * -1);
+            margin-bottom: var(--padding);
+        }
+            #Section_BranchInfo .thumbnail img {
+                width: 100%;
+                height: 300px;
+                background: var(--gray-4);
+                object-fit: cover;
+                filter: brightness(0.6);
+            }
+            #Section_BranchInfo .thumbnail span {
+                position: absolute;
+                bottom: var(--padding);
+                left: var(--padding);
+                right: var(--padding);
+                font-size: 1.7em;
+                font-weight: bold;
+                line-height: 1;
+            }
+        #Section_BranchInfo .list {
+            max-width: 800px;
+        }
+            #Section_BranchInfo .list:not(#List_Staff) .stack {
+                grid-auto-columns: 8em auto;
+            }
+            #Section_BranchInfo .list#List_Staff .empty {
+                min-height: 100px;
+                text-align: center;
+                color: var(--foreground-description);
+            }
+                #Section_BranchInfo .list:not(#List_Staff) .stack > *:last-child {
+                    text-align: right;
+                    justify-self: end;
+                }
+            #Section_BranchInfo .list:not(#List_Staff) .stack :where(> span:first-child, *:not(button) > span:first-child) {
+                color: var(--foreground-description);
+            }
+            #Section_BranchInfo .list .stack .horizontal {
+                display: grid;
+                align-items: center;
+                grid-auto-flow: column;
+                grid-auto-columns: auto max-content;
+            }
+            #Section_BranchInfo .list .stack span.selectable {
+                user-select: text;
+                -webkit-user-select: text;
+                text-align: right;
+            }
+            #Section_BranchInfo .list .stack button.plain {
+                padding: 0;
+            }
+            #Section_BranchInfo #Button_DeleteBranch {
+                width: 100%;
+                height: 40px;
+            }
+
+    @media screen and (min-width: 1120px) {
+        #Activity_Main {
+            background: var(--gray-7);
+            box-shadow: inset -10px 0 5px -10px var(--border-sidebar);
+        }
+            #Activity_Main > section {
+                background: transparent;
+            }
+        .root .main:has(> .activity) {
+            grid-auto-flow: column;
+            grid-auto-columns: 400px auto;
+        }
+        #Section_BranchInfo.suppressanimation {
+            transition: none !important;
+        }
+            #Section_BranchInfo button.back {
+                visibility: hidden;
+            }
+        #List_Branch .stack.active {
+            background: var(--background-list-hover);
+        }
+    }
+    @media screen and (
+        (max-width: 500px) or 
+        ((min-width: 1120px) and (max-width: 1150px))
+    ) {
+        #Section_BranchInfo .list .stack:not(:has(.vertical)):not(.horizontal) {
+            grid-auto-columns: 100% !important;
+            grid-auto-flow: row;
+            padding: 0.5em 1em;
+            justify-content: start;
+        }
+            #Section_BranchInfo .list .stack > *:last-child,
+            #Section_BranchInfo .list .stack > span.selectable {
+                text-align: left !important;
+                justify-self: start !important;
+            }
+    }
+
+    #PopOver_MoveToBranch .notice {
+        display: grid;
+        gap: 1em;
+        margin-bottom: 1em;
+    }
+</style>
+
+<section id="Section_BranchList">
+    <div class="header">
+        <div class="title">Cabang</div>
+        <div class="buttons">
+            <button id="Button_NewBranch">Tambah</button>
+            <button id="Button_Refresh" class="icon" ad-tooltip="Muat Ulang">&#xead8;</button>
+        </div>
+        <input type="search" id="Input_Search" placeholder="Cari berdasarkan nama atau alamat" ad-cancellabel="Batal"/>
+    </div>
+    <div class="content">
+        <div id="List_Branch" class="list plain">
+            <div class="progressring" id="Loading_List"></div>
+        </div>
+    </div>
+</section>
+
+<section id="Section_BranchInfo">
+    <div class="header cascaded">
+        <div class="title hide"></div>
+        <div class="buttons dynamic" theme="dark">
+            <button id="Button_MenuBranch">
+                <div class="progressring"></div>
+                <span class="icon">&#xf153;</span>
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="thumbnail" theme="dark">
+            <img id="Image_BranchThumbnail"/>
+            <span id="Text_BranchName"></span>
+        </div>
+        
+        <div class="list" ad-header="Informasi Cabang">
+            <div class="stack">
+                <span>Alamat</span>
+                <span id="Text_BranchAlamat" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Total Mobil</span>
+                <span id="Text_BranchCarCount" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Total Pegawai</span>
+                <span id="Text_BranchStaffCount" class="selectable"></span>
+            </div>
+        </div>
+        <div class="list" id="List_Staff" ad-header="Daftar Pegawai">
+        </div>
+    </div>
+</section>
+
+<div id="PopOver_NewBranch" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelNewBranch">Batal</button>
+                <button id="Button_SubmitNewBranch">
+                    <div class="progressring"></div>
+                    <span>Tambah</span>
+                </button>
+            </div>
+            <span class="title">Cabang Baru</span>
+        </div>
+        <div class="content">
+            <div class="list">
+                <div class="stack vertical">
+                    <span>Nama</span>
+                    <input type="text" id="Input_NewBranchName" class="plain"/>
+                </div>
+                <div class="stack vertical">
+                    <span>Alamat</span>
+                    <input type="text" id="Input_NewBranchAddress" class="plain"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="PopOver_EditBranch" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelEditBranch">Batal</button>
+                <button id="Button_SubmitEditBranch">
+                    <div class="progressring"></div>
+                    <span>Simpan</span>
+                </button>
+            </div>
+            <span class="title">Edit Cabang</span>
+        </div>
+        <div class="content">
+            <div class="list">
+                <div class="stack vertical">
+                    <span>Nama</span>
+                    <input type="text" id="Input_EditBranchName" class="plain"/>
+                </div>
+                <div class="stack vertical">
+                    <span>Alamat</span>
+                    <input type="text" id="Input_EditBranchAddress" class="plain"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="PopOver_MoveToBranch" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelMoveToBranch">Batal</button>
+                <button id="Button_SubmitMoveToBranch">
+                    <div class="progressring"></div>
+                    <span>Lanjut</span>
+                </button>
+            </div>
+            <span class="title">Pindah Mobil ke...</span>
+        </div>
+        <div class="content">
+            <div class="notice">
+                <div>Cabang <span id="Text_MoveToBranchName"></span> masih memiliki beberapa mobil atau pegawai.</div>
+                <div>Silakan lakukan penghapusan mobil atau pegawai secara manual yang berada di cabang tersebut atau pindahkan ke cabang lain terlebih dahulu.</div>
+            </div>
+            <div class="list">
+                <div class="stack">
+                    <span>Cabang Baru</span>
+                    <select id="Select_MoveToBranch" class="plain">
+                        <option value="">Pilih...</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener("resize", handleActivityResize);
+    window.addEventListener("load", handleActivityResize);
+ 
+    let suppressAnimationTimeout;
+    function handleActivityResize() {
+        if (window.innerWidth >= 1120) {
+            Activity_Main.navigateTo(0);
+            
+            if (Section_BranchInfo.parentNode == Activity_Secondary) 
+                return;
+            
+            Activity_Secondary.innerHTML = null;
+            Activity_Secondary.append(Section_BranchInfo);
+            Activity_Secondary.classList.add("grid");
+            
+            Section_BranchInfo.data = null;
+            Section_BranchInfo.activeElement?.click();
+        } 
+        else {
+            Activity_Main.append(Section_BranchInfo);
+            Activity_Main.navigateTo(0);
+        }
+    }
+    
+    // Mendaftarkan input untuk event-eventnya
+    registerInput([Input_NewBranchName, Input_NewBranchAddress], Button_CancelNewBranch, Button_SubmitNewBranch, PopOver_NewBranch);
+    registerInput([Input_EditBranchName, Input_EditBranchAddress], Button_CancelEditBranch, Button_SubmitEditBranch, PopOver_EditBranch);
+    registerInput([Select_MoveToBranch], Button_CancelMoveToBranch, Button_SubmitMoveToBranch, PopOver_MoveToBranch);
+
+    Button_NewBranch.onclick = function() {
+        // Bersihkan semua value input setiap kali Pop Over dibuka
+        Input_NewBranchName.value = 
+        Input_NewBranchAddress.value = "";
+
+        PopOver_NewBranch.open(Button_NewBranch);
+    }
+    Button_SubmitNewBranch.onaction = function() {
+        return new Promise(async function(resolve) {
+            await $.ajax({
+                type: "POST",
+                url: "/api/branch",
+                data: {
+                    // Data yang akan di-input ke dalam database
+                    // melalui server
+                    nama_cabang: Input_NewBranchName.value,
+                    alamat_cabang: Input_NewBranchAddress.value
+                },
+                success: async function(data) {
+                    // Jika berhasil, refresh seluruh daftar pegawai
+                    await fetchBranches();
+                    resolve(true);
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "add_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Menambah Cabang",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    })
+                }
+            })
+        });
+    }
+    Button_SubmitEditBranch.onaction = function() {
+        return new Promise(async function(resolve) {
+            await $.ajax({
+                type: "PUT",
+                url: "/api/branch",
+                data: {
+                    // Data yang akan di-input ke dalam database
+                    // melalui server
+                    id_cabang: Section_BranchInfo.data.id_cabang,
+                    nama_cabang: Input_EditBranchName.value,
+                    alamat_cabang: Input_EditBranchAddress.value
+                },
+                success: async function(data) {
+                    // Jika berhasil, refresh seluruh daftar pegawai
+                    await fetchBranches();
+                    resolve(true);
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "edit_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Mengedit Cabang",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    })
+                }
+            })
+        });
+    }
+    Button_MenuBranch.onclick = function(event) {
+        Components.ContextMenu.Open("menu_edit", this, event);
+    }
+
+    fetchBranches();
+    
+    Button_Refresh.onclick = () => fetchBranches();
+
+    Input_Search.oninput = function() {
+        searchBranches(this.value);
+    }
+
+    let lastKeyword = "";
+    let keywordTimeout = null;
+    
+    // Untuk mencari cabang berdasarkan keyword
+    async function searchBranches(keyword) {
+        // Menghapus timeout supaya delay pencariannya ke-reset
+        clearTimeout(keywordTimeout);
+
+        // Keyword ditokenisasi jadi huruf kecil semua dan tanpa spasi di awal/akhir
+        keyword = keyword.toLowerCase().trim();
+
+        // Jika kosong, maka kembali fetch seluruh daftar cabang
+        if (keyword == "") {
+            await fetchBranches();
+            List_Branch.classList.remove("loading");
+            lastKeyword = "";
+            return;
+        }
+
+        // Jika keyword sama dengan yang terakhir diketik,
+        // abaikan supaya bisa mengurangi spam request ke server
+        if (keyword == lastKeyword)
+            return;
+
+        List_Branch.classList.add("loading");
+        
+        // Dibuat timeout agar tidak langsung nembak server tiap kali user ngetik satu huruf
+        keywordTimeout = setTimeout(async function() {
+            await fetchBranches(keyword);
+            List_Branch.classList.remove("loading");
+        }, 500);
+
+        lastKeyword = keyword;
+    }
+
+    // Mengambil data daftar cabang dari server
+    async function fetchBranches(keyword, filters = []) {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/branch");
+        url.searchParams.set("summary", 1);
+
+        // Jika dicantumkan keyword
+        if (keyword)
+            // Maka akan ditambahkan parameter search ke url
+            url.searchParams.set("search", keyword);
+
+        // Jika dicantumkan filter
+        if (filters.length > 0)
+            // Maka akan ditambahkan parameter filter-filternya ke url
+            for (const filter of filters)
+                url.searchParams.set(filter.name, filter.value);
+
+        // Menghilangkan dummy hostnya supaya kembali jadi format path
+        url = url.toString().replace(dummyHost, "");
+        const branches = await $.get(url);
+
+        if (!keyword)
+            window.branches = branches;
+        
+        // Dibersihkan seluruh itemnya dari list untuk di-render dari awal
+        List_Branch.clearItems();
+        appendBranch(branches || [], !keyword == false || filters.length > 0);
+
+        if (window['Loading_List'])
+            Loading_List.classList.add("hidden");
+    }
+
+    function appendBranch(branches, isQuery = false) {
+        let activeElement = null;
+
+        for (const branch of branches) {
+            const element = renderBranch(branch);
+            List_Branch.append(element);
+ 
+            if (isQuery == false && element.classList.contains("active"))
+                activeElement = element;
+        }
+        
+        if (activeElement) {
+            const activity = List_Branch.parentNode.parentNode;
+        }
+
+        if (isQuery == false)
+            lastBranches = [...List_Branch.children].map(o => o.data).filter(Boolean) || [];
+    }
+
+    // Merender struktur html untuk masing-masing item cabang
+    function renderBranch(branch) {
+        // Bikin elemen untuk gambar thumbnail
+        const thumbnailElement = document.createElement("img");
+        thumbnailElement.src = "/api/thumbnail/branch/" + branch.id_cabang;
+        thumbnailElement.classList.add("thumbnail");
+
+        // Bikin elemen untuk teks nama cabang
+        const nameElement = document.createElement("span");
+        nameElement.classList.add("name");
+        nameElement.innerText = branch.nama_cabang;
+
+        // Bikin elemen untuk teks alamat cabang
+        const addressElement = document.createElement("span");
+        addressElement.classList.add("address");
+        addressElement.innerText = branch.alamat_cabang;
+
+        // Bikin grup untuk menyatukan teks nama dan alamat
+        const groupElement = document.createElement("div");
+        groupElement.classList.add("group");
+        groupElement.append(nameElement);
+        groupElement.append(addressElement);
+
+        // Bikin kontainer utama membungkus ngebungkus thumbnail dan grup teks
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("stack");
+        itemElement.classList.add("clickable");
+        itemElement.classList.add("iconed");
+        itemElement.append(thumbnailElement);
+        itemElement.append(groupElement);
+        
+        itemElement.data = branch;
+        
+        itemElement.onclick = async function(isRefresh = false) {
+            Section_BranchInfo.activeElement = itemElement;
+
+            const activity = Section_BranchInfo.parentNode;
+            const activityOffset = activity == Activity_Main ? 0 : -1;
+
+            if (Section_BranchInfo.data == branch && activity == Activity_Secondary) {
+                if (isRefresh == false) {
+                    return;
+                }
+            }
+            
+            Section_BranchInfo.data = branch;
+            Section_BranchInfo.thumbnailElement = thumbnailElement;
+            Image_BranchThumbnail.src = "";
+            Text_BranchCarCount.innerText = branch.banyak_mobil;
+            Text_BranchStaffCount.innerText = branch.banyak_pegawai;
+            
+            if (activity == Activity_Secondary) {
+                for (const e of [...List_Branch.children])
+                    e.classList.remove("active");
+                itemElement.classList.add("active");
+            }
+        
+            const backButton = Section_BranchInfo.querySelector(".back");
+            if (backButton) {
+                backButton.onclick = () => activity.navigateTo(0);
+            }
+
+            if (activity.sections) {
+                activity.sections[1 + activityOffset].name = branch.nama_cabang;
+                activity.sections[1 + activityOffset].scrollTop = 0;
+            }
+            activity.navigateTo(1 + activityOffset, activity == Activity_Secondary);
+            
+            
+            Image_BranchThumbnail.src = thumbnailElement.src;
+            Text_BranchName.innerText = branch.nama_cabang;
+            Text_BranchAlamat.innerText = branch.alamat_cabang;
+            
+            await fetchStaffs(branch.id_cabang);
+            
+        }
+
+        if (Section_BranchInfo?.data?.id_cabang == branch.id_cabang) {
+            itemElement.classList.add("active");
+            itemElement.click();
+        }
+
+        return itemElement;
+    }
+
+    function deleteBranch() {
+        const branch = Section_BranchInfo.data;
+
+        if (branch.banyak_mobil == 0 && branch.banyak_pegawai == 0) {
+            confirmationDelete();
+        }
+        else {
+            // hapus yang lama
+            while (Select_MoveToBranch.options.length > 1)
+                Select_MoveToBranch.options.remove(1);
+
+            for (const currBranch of window.branches || []) {
+                if (currBranch.id_cabang == branch.id_cabang)
+                    continue;
+                const optionElement = document.createElement("option");
+                optionElement.value = currBranch.id_cabang;
+                optionElement.innerText = currBranch.nama_cabang;
+                Select_MoveToBranch.options.add(optionElement);
+            }
+
+            Text_MoveToBranchName.innerText = branch.nama_cabang;
+            Select_MoveToBranch.value = "";
+            Button_SubmitMoveToBranch.onaction = function() {
+                confirmationDelete(Select_MoveToBranch.value);
+            };
+            PopOver_MoveToBranch.open(Button_MenuBranch);
+        }
+
+        function confirmationDelete(id_cabang_baru) {
+            Components.ActionSheet.Open({
+                Title: "Yakin mau cabang ini?",
+                Description: `Cabang "${branch.nama_cabang}" akan terhapus permanen dari sistem.`,
+                Actions: [
+                    {
+                        Title: "Hapus",
+                        Type: "Plain.Critical",
+                        Action: function() {
+                            return new Promise(function(resolve) {
+                                $.ajax({
+                                    type: "DELETE",
+                                    url: "/api/branch",
+                                    data: { 
+                                        id_cabang_lama: branch.id_cabang,
+                                        id_cabang_baru: id_cabang_baru
+                                    },
+                                    success: async function() {
+                                        Section_BranchInfo.data = null;
+                                        Activity_Main.navigateTo(0);
+                                        Activity_Secondary.navigateTo(-1, true);
+                                        await fetchBranches();
+                                        resolve(true);
+                                    },
+                                    error: function(error) {
+                                        Components.Notification.Send({
+                                            Id: "delete_failed",
+                                            Icon: "\ufe60",
+                                            Title: "Gagal Menghapus Pegawai",
+                                            Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                                        });
+                                        resolve(false);
+                                    }
+                                });
+                            });
+                        }
+                    },
+                    {
+                        Title: "Batal",
+                        Type: "Footer"
+                    }
+                ]
+            });
+        }
+    }
+
+    function changeBranchThumbnail() {
+        const file = document.createElement("input");
+        file.type = "file";
+        file.accept = ".png, .jpg, .jpeg, .webp";
+        file.oninput = function() {
+            const files = Array.from(this.files);
+
+            if (files.length == 0)
+                return;
+
+            if (files[0].size > 3000000)
+                return Components.Notification.Send({ 
+                    Id: "thumbnail_failed", 
+                    Title: "Gagal Mengubah Thumbnail", 
+                    Message: "Ukuran foto tidak boleh lebih besar dari 3 MB.", 
+                    Icon: "\ufe64", 
+                    Buttons: [
+                        {
+                            Text: "Tutup"
+                        }
+                    ] 
+                });
+                
+            const form = new FormData();
+            form.append("file", files[0]);
+
+            Section_BranchInfo.classList.add("loading");
+
+            $.ajax({
+                type: "POST",
+                url: "/api/thumbnail/branch/" + Section_BranchInfo.data.id_cabang,
+                data: form,
+                contentType: false,
+                processData: false,
+                success: async function() {
+                    const url = "/api/thumbnail/branch/" + Section_BranchInfo.data.id_cabang + "?cache=false&time=" + Date.now();
+
+                    Image_BranchThumbnail.src = url;
+                    Section_BranchInfo.thumbnailElement.src = url;
+                    
+                    Section_BranchInfo.thumbnailElement.onload = function() {
+                        Components.Notification.Remove({ Id: "thumbnail_failed" });
+                        Components.Notification.Send({ 
+                            Id: "thumbnail_success", 
+                            Title: "Berhasil Mengubah Thumbnail", 
+                            Message: "Thumbnail telah diubah.", 
+                            Icon: "\uf873"
+                        });
+                        Section_BranchInfo.classList.remove("loading");   
+                    };
+                },
+                error: function(error) {               
+                    Components.Notification.Send({ 
+                        Id: "thumbnail_failed", 
+                        Title: "Gagal Mengubah Thumbnail", 
+                        Message: error.responseText || "Ada yang salah dengan server. Coba lagi nanti.", 
+                        Icon: "\ufe64", 
+                        Buttons: [
+                            {
+                                Text: "Tutup"
+                            }
+                        ] 
+                    });
+                    Section_BranchInfo.classList.remove("loading");       
+                }
+            });
+        }
+        file.click();
+    }
+
+    async function fetchStaffs(branch) {
+        const loadingElement = document.createElement("div");
+        loadingElement.classList.add("progressring");
+
+        List_Staff.clearItems();
+        List_Staff.append(loadingElement);
+
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/staff");
+        url.searchParams.set("branch", branch);
+        url = url.toString().replace(dummyHost, "");
+        const staffs = await $.get(url) || [];
+        
+        loadingElement.remove();
+        
+        if (staffs.length == 0) {
+            const emptyElement = document.createElement("div");
+            emptyElement.classList.add("empty")
+            emptyElement.classList.add("stack")
+            emptyElement.innerText = "Tidak ada pegawai";
+            List_Staff.append(emptyElement);
+        }
+        else {
+            appendStaff(staffs);
+        }
+        
+        if (window['Loading_Staff'])
+            Loading_Staff.classList.add("hidden");
+    }
+
+    function appendStaff(staffs) {
+        for (const staff of staffs) {
+            const element = renderStaff(staff);
+            List_Staff.append(element);
+        }
+    }
+ 
+    function renderStaff(staff) {
+        const nameElement = document.createElement("span");
+        nameElement.classList.add("name");
+        nameElement.innerText = staff.nama_user;
+
+        const usernameElement = document.createElement("span");
+        usernameElement.classList.add("username");
+        usernameElement.innerText = "@" + staff.username;
+
+        const primaryElement = document.createElement("div");
+        primaryElement.classList.add("primary");
+        primaryElement.append(nameElement);
+        
+        const secondaryElement = document.createElement("div");
+        secondaryElement.classList.add("secondary");
+        secondaryElement.append(usernameElement);
+
+        const headerElement = document.createElement("div");
+        headerElement.classList.add("header");
+        headerElement.append(primaryElement);
+        headerElement.append(secondaryElement);
+        
+        const avatarElement = document.createElement("img");
+        avatarElement.classList.add("avatar");
+        avatarElement.src = "/api/avatar/" + staff.id_user;
+        
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("stack");
+        itemElement.classList.add("iconed");
+        itemElement.classList.add("horizontal");
+        itemElement.append(avatarElement);
+        itemElement.append(headerElement);
+        itemElement.data = staff;
+
+        return itemElement;
+    }
+
+    // Daftar menu cabang
+    Components.ContextMenu.Add("menu_edit", [
+        {
+            Title: "Edit...",
+            Icon: "f7cf",
+            Action: function() {
+                const branch = Section_BranchInfo.data;
+                Input_EditBranchName.value = branch.nama_cabang;
+                Input_EditBranchAddress.value = branch.alamat_cabang;
+                PopOver_EditBranch.open(Button_MenuBranch);
+            }
+        },
+        {
+            Title: "Ganti Foto",
+            Icon: "f87f",
+            Action: function() {
+                changeBranchThumbnail();
+            }
+        },
+        "separator",
+        {
+            Title: "Hapus...",
+            Icon: "fd3c",
+            Type: "critical",
+            Action: function() {
+                deleteBranch();
+            }
+        }
+    ]);
+</script>
