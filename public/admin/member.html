@@ -1,0 +1,353 @@
+<ad-title>Member - Admin</ad-title>
+
+<style>
+    #List_Member .header {
+        grid-auto-rows: 1.25em;
+    }
+        #List_Member .header .primary .name,
+        #List_Member .header .secondary .username {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #List_Member .stack .avatar {
+            border-radius: 100%;
+            width: 100%;
+            margin: 0.5em 0;
+        }
+
+    [theme=light]
+    #Section_MemberInfo {
+        background: var(--background-activity-grid);
+    }
+        #Section_MemberInfo .profile {
+            display: grid;
+            max-width: 800px;
+            justify-items: center;
+            margin-bottom: var(--padding);
+        }
+            #Section_MemberInfo .profile img {
+                max-width: 150px;
+                aspect-ratio: 1;
+                border-radius: 100%;
+                margin-bottom: 1em;
+            }
+            #Section_MemberInfo .profile span {
+                font-size: 1.7em;
+                font-weight: bold;
+                line-height: 1;
+                text-align: center;
+            }
+            #Section_MemberInfo .profile span#Text_MemberUsername {
+                color: var(--foreground-description);
+                font-size: 1.2em;
+                margin-top: 0.2em;
+            }
+        #Section_MemberInfo .list {
+            max-width: 800px;
+        }
+            #Section_MemberInfo .list .stack {
+                grid-auto-columns: 8em auto;
+            }
+                #Section_MemberInfo .list .stack > *:last-child {
+                    text-align: right;
+                    justify-self: end;
+                }
+            #Section_MemberInfo .list .stack :where(> span:first-child, *:not(button) > span:first-child) {
+                color: var(--foreground-description);
+            }
+            #Section_MemberInfo .list .stack .horizontal {
+                display: grid;
+                align-items: center;
+                grid-auto-flow: column;
+                grid-auto-columns: auto max-content;
+            }
+            #Section_MemberInfo .list .stack span.selectable {
+                user-select: text;
+                -webkit-user-select: text;
+                text-align: right;
+            }
+            #Section_MemberInfo .list .stack button.plain {
+                padding: 0;
+            }
+            #Section_MemberInfo #Button_DeleteMember {
+                width: 100%;
+                height: 40px;
+            }
+
+    @media screen and (min-width: 1120px) {
+        #Activity_Main {
+            background: var(--gray-7);
+            box-shadow: inset -10px 0 5px -10px var(--border-sidebar);
+        }
+            #Activity_Main > section {
+                background: transparent;
+            }
+        .root .main:has(> .activity) {
+            grid-auto-flow: column;
+            grid-auto-columns: 400px auto;
+        }
+        #Section_MemberInfo.suppressanimation {
+            transition: none !important;
+        }
+            #Section_MemberInfo button.back {
+                visibility: hidden;
+            }
+        #List_Member .stack.active {
+            background: var(--background-list-hover);
+        }
+    }
+    @media screen and (
+        (max-width: 500px) or 
+        ((min-width: 1120px) and (max-width: 1150px))
+    ) {
+        #Section_MemberInfo .list .stack:not(:has(.vertical)):not(.horizontal) {
+            grid-auto-columns: 100%;
+            grid-auto-flow: row;
+            padding: 0.5em 1em;
+            justify-content: start;
+        }
+            #Section_MemberInfo .list .stack > *:last-child,
+            #Section_MemberInfo .list .stack > span.selectable {
+                text-align: left;
+                justify-self: start;
+            }
+    }
+</style>
+
+<section id="Section_MemberList">
+    <div class="header">
+        <div class="title">Member</div>
+        <div class="buttons">
+            <button></button>
+            <button id="Button_Refresh" class="icon" ad-tooltip="Muat Ulang">&#xead8;</button>
+        </div>
+        <input type="search" id="Input_Search" placeholder="Cari berdasarkan nama" ad-cancellabel="Batal"/>
+    </div>
+    <div class="content">
+        <div id="List_Member" class="list plain">
+            <div class="progressring" id="Loading_List"></div>
+        </div>
+    </div>
+</section>
+
+<section id="Section_MemberInfo">
+    <div class="header cascaded">
+        <div class="title hide"></div>
+    </div>
+    <div class="content">
+        <div class="profile">
+            <img id="Image_MemberAvatar"/>
+            <span id="Text_MemberName"></span>
+            <span id="Text_MemberUsername"></span>
+        </div>
+        
+        <div class="list" ad-header="Informasi Pribadi">
+            <div class="stack">
+                <span>NIK</span>
+                <span id="Text_MemberNIK" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Nomor Telepon</span>
+                <button class="plain" ad-type="newtab" ad-goto>
+                    <span id="Text_MemberTelp"></span>
+                    <span class="icon">&#xebad;</span>
+                </button>
+            </div>
+            <div class="stack">
+                <span>Alamat</span>
+                <span id="Text_MemberAlamat" class="selectable"></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    window.addEventListener("resize", handleActivityResize);
+    window.addEventListener("load", handleActivityResize);
+ 
+    let suppressAnimationTimeout;
+    function handleActivityResize() {
+        if (window.innerWidth >= 1120) {
+            Activity_Main.navigateTo(0);
+            
+            if (Section_MemberInfo.parentNode == Activity_Secondary) 
+                return;
+            
+            Activity_Secondary.innerHTML = null;
+            Activity_Secondary.append(Section_MemberInfo);
+            Activity_Secondary.classList.add("grid");
+            
+            Section_MemberInfo.data = null;
+            Section_MemberInfo.activeElement?.click();
+        } 
+        else {
+            Activity_Main.append(Section_MemberInfo);
+            Activity_Main.navigateTo(0);
+        }
+    }
+
+    fetchMembers();
+    
+    Button_Refresh.onclick = () => fetchMembers();
+
+    Input_Search.oninput = function() {
+        searchMembers(this.value);
+    }
+
+    let lastKeyword = "";
+    let keywordTimeout = null;
+    let lastMembers = [];
+    
+    async function searchMembers(keyword) {
+        clearTimeout(keywordTimeout);
+        keyword = keyword.toLowerCase().trim();
+
+        if (keyword == "") {
+            List_Member.clearItems();
+            appendMember(lastMembers);
+            List_Member.classList.remove("loading");
+            lastKeyword = "";
+            return;
+        }
+
+        if (keyword == lastKeyword) 
+            return;
+
+        List_Member.classList.add("loading");
+        
+        keywordTimeout = setTimeout(async function() {
+            await fetchMembers(keyword);
+            List_Member.classList.remove("loading");
+        }, 500);
+
+        lastKeyword = keyword;
+    }
+
+    async function fetchMembers(keyword, filters = []) {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/member");
+
+        if (keyword) url.searchParams.set("search", keyword);
+
+        if (filters.length > 0)
+            for (const filter of filters)
+                url.searchParams.set(filter.name, filter.value);
+
+        url = url.toString().replace(dummyHost, "");
+        const members = await $.get(url);
+        
+        List_Member.clearItems();
+        appendMember(members || [], !keyword == false || filters.length > 0);
+        
+        if (window['Loading_List'])
+            Loading_List.classList.add("hidden");
+    }
+
+    function appendMember(members, isQuery = false) {
+        let activeElement = null;
+
+        for (const member of members) {
+            const element = renderMember(member);
+            List_Member.append(element);
+ 
+            if (isQuery == false && element.classList.contains("active"))
+                activeElement = element;
+        }
+        
+        if (activeElement) {
+            const activity = List_Member.parentNode.parentNode;
+        }
+
+        if (isQuery == false)
+            lastMembers = [...List_Member.children].map(o => o.data).filter(Boolean) || [];
+    }
+
+    function renderMember(member) {
+        const nameElement = document.createElement("span");
+        nameElement.classList.add("name");
+        nameElement.innerText = member.nama_user;
+
+        const usernameElement = document.createElement("span");
+        usernameElement.classList.add("username");
+        usernameElement.innerText = "@" + member.username;
+
+        const primaryElement = document.createElement("div");
+        primaryElement.classList.add("primary");
+        primaryElement.append(nameElement);
+        
+        const secondaryElement = document.createElement("div");
+        secondaryElement.classList.add("secondary");
+        secondaryElement.append(usernameElement);
+
+        const headerElement = document.createElement("div");
+        headerElement.classList.add("header");
+        headerElement.append(primaryElement);
+        headerElement.append(secondaryElement);
+        
+        const avatarElement = document.createElement("img");
+        avatarElement.classList.add("avatar");
+        avatarElement.src = "/api/avatar/" + member.id_user;
+        
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("stack");
+        itemElement.classList.add("iconed");
+        itemElement.classList.add("clickable");
+        itemElement.append(avatarElement);
+        itemElement.append(headerElement);
+        itemElement.data = member;
+        
+        itemElement.onclick = function(isRefresh = false) {
+            Section_MemberInfo.activeElement = itemElement;
+
+            const activity = Section_MemberInfo.parentNode;
+            const activityOffset = activity == Activity_Main ? 0 : -1;
+
+            if (Section_MemberInfo.data == member && activity == Activity_Secondary) {
+                if (isRefresh == false) {
+                    return;
+                }
+            }
+            
+            Section_MemberInfo.data = member;
+            
+            if (activity == Activity_Secondary) {
+                for (const e of [...List_Member.children])
+                    e.classList.remove("active");
+                itemElement.classList.add("active");
+            }
+        
+            const backButton = Section_MemberInfo.querySelector(".back");
+            if (backButton) {
+                backButton.onclick = () => activity.navigateTo(0);
+            }
+
+            if (activity.sections) {
+                activity.sections[1 + activityOffset].name = member.nama_user;
+                activity.sections[1 + activityOffset].scrollTop = 0;
+            }
+            activity.navigateTo(1 + activityOffset, activity == Activity_Secondary);
+            
+            Image_MemberAvatar.src = avatarElement.src;
+            Text_MemberName.innerText = member.nama_user;
+            Text_MemberUsername.innerText = "@" + member.username;
+            
+            Text_MemberNIK.innerText = member.nomor_ktp || "-";
+            Text_MemberAlamat.innerText = member.alamat_user || "-";
+            
+            Text_MemberTelp.innerText = member.nomor_telepon ? Formatter.PhoneNumber(member.nomor_telepon) : "-";
+            if (member.nomor_telepon) {
+                Text_MemberTelp.parentNode.setAttribute("ad-goto", "https://wa.me/" + Formatter.PhoneNumber(member.nomor_telepon).replace(/[^0-9]/gi, ""));
+            } else {
+                Text_MemberTelp.parentNode.removeAttribute("ad-goto");
+            }
+        }
+
+        if (Section_MemberInfo?.data?.id_user == member.id_user) {
+            itemElement.classList.add("active");
+            itemElement.click();
+        }
+
+        return itemElement;
+    }
+</script>

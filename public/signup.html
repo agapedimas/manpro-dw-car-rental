@@ -1,0 +1,168 @@
+<ad-title>Daftar</ad-title>
+
+<style>
+    .root
+    {
+        background-image: url("/assets/background_auth.webp");
+        background-size: cover;
+        background-color: #4269AE;
+        grid-auto-columns: auto;
+        grid-auto-rows: auto;
+        grid-template-areas: "Content";
+    }
+    .panel
+    {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        display: grid;
+        grid-auto-flow: row;
+        transform: translate(-50%, -50%);
+        background: var(--gray-6);
+        padding: 33px 30px;
+        border-radius: 25px;
+        border: 1px solid var(--overlay-6);
+        gap: 0.3em;
+        width: 350px;
+        box-shadow: 0 5px 35px 0px rgba(0, 0, 0, 0.075);
+    }
+        .panel img
+        {
+            height: 1.55em;
+        }
+        .panel .title
+        {
+            font-size: 1.75em;
+            font-family: var(--font-bold);
+            margin: 0.25em 0 0;
+        }
+        .panel .subtitle
+        {
+            font-size: 1.25em;
+            margin: 0 0 25px;
+        }
+        .panel .inputs
+        {
+            display: grid;
+            gap: 7px;
+        }
+            .panel .inputs #Input_NIK::-webkit-outer-spin-button,
+            .panel .inputs #Input_NIK::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+            .panel .inputs #Input_NIK {
+                -moz-appearance: textfield;
+            }
+            .panel .inputs .error 
+            {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: max-content auto;
+                gap: 0.5em;
+                color: var(--notice);
+                margin: 0 0 0.5em 0;
+                font-size: 0.85em;
+                letter-spacing: 0.015em;
+            }
+                .panel .inputs .error::before {
+                    content: "\f1aa";
+                    font-family: var(--font-icon);
+                }
+        .panel .buttons
+        {
+            display: grid;
+            gap: 7px;
+            margin: 25px 0 0;
+        }
+            .panel .buttons .error 
+            {
+                color: var(--notice);
+                text-align: center;
+                margin: 0 0 1em;
+                font-size: 0.9em;
+            }
+            .panel .buttons button
+            {
+                padding: 0.6em 0.8em;
+            }
+                .panel .buttons button .progressring
+                {
+                    width: 1em;
+                    height: 1em;
+                }
+            .panel .buttons .suggestion {
+                margin-top: 1em;
+                text-align: center;
+            }
+</style>
+
+<div class="panel" theme="light" accent="blue">
+    <img src="<#? appicon ?#>" ad-goto="/"/>
+    <div class="title"><#? apptitle ?#></div>
+    <div class="subtitle">Daftar untuk menjadi member dan dapatkan mobil favoritmu.</div>
+    <div class="inputs">
+        <input type="tel" id="Input_PhoneNumber" ad-text="Nomor Telepon"/>
+        <span class="error hidden" id="Error_Phone">Nomor telepon tidak valid</span>
+        <input type="number" id="Input_NIK" ad-text="Nomor KTP" ad-type="nik" maxlength="16"/>
+        <span class="error hidden" id="Error_NIK">NIK harus berupa 16 digit</span>
+        <input type="text" id="Input_Address" ad-text="Alamat"/>
+        <input type="text" id="Input_Name" ad-text="Nama" ad-type="name"/>
+        <span class="error hidden" id="Error_Name">Masukkan nama dengan benar</span>
+        <input type="text" id="Input_Username" ad-type="username" ad-text="Username"/>
+        <input type="password" id="Input_Password" ad-text="Kata Sandi"/>
+        <input type="password" id="Input_PasswordConfirm" ad-text="Konfirmasi Kata Sandi" ad-type="confirmpassword"/>
+        <span class="error hidden" id="Error_Password">Konfirmasi kata sandi tidak sesuai</span>
+    </div>
+    <div class="buttons">
+        <span class="error hidden" id="Error_General"></span>
+        <button class="accent" id="Button_SignUp" disabled>
+            <div class="progressring"></div>
+            <span>Daftar</span>
+        </button>
+        <div class="suggestion">
+            Sudah punya akun?
+            <a class="link" ad-goto="/signin">Masuk</a>
+        </span>
+    </div>
+</div>
+
+<script src="/auth.js"></script>
+<script>
+    $(".titlebar").remove();
+    $("nav").remove();
+    $(".loading").hide();
+
+    registerFields(
+        [Input_PhoneNumber, Input_NIK, Input_Address, Input_Name, Input_Username, Input_Password, Input_PasswordConfirm], 
+        Button_SignUp, 
+        [Error_Phone, Error_NIK, Error_Name, Error_Password])
+
+    Button_SignUp.onaction = function() {
+        Error_General.classList.add("hidden");
+        return new Promise(function(resolve){
+            $.ajax
+            ({
+                url: "/api/signup",
+                type: "POST",
+                data: 
+                { 
+                    name: Input_Name.value, 
+                    username: Input_Username.value, 
+                    password: Input_Password.value,
+                    nomor_telepon: Input_PhoneNumber.value,
+                    nomor_ktp: Input_NIK.value,
+                    alamat: Input_Address.value
+                },
+                success: function(data) {
+                    window.location.replace("/");
+                },
+                error: function(error) {
+                    resolve(false);
+                    Error_General.classList.remove("hidden");
+                    Error_General.innerText = error.responseText || "Ada yang salah dengan server. Coba lagi nanti. (" + error.status + ")"
+                }
+            });
+        });
+    }
+</script>
