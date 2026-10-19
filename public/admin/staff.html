@@ -1,0 +1,645 @@
+<ad-title>Pegawai - Admin</ad-title>
+
+<style>
+    #List_Staff .header {
+        grid-auto-rows: 1.25em;
+    }
+        #List_Staff .header .primary .name,
+        #List_Staff .header .secondary .username {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #List_Staff .stack .avatar {
+            border-radius: 100%;
+            width: 100%;
+            margin: 0.5em 0;
+        }
+
+    [theme=light]
+    #Section_StaffInfo {
+        background: var(--background-activity-grid);
+    }
+        #Section_StaffInfo .profile {
+            display: grid;
+            max-width: 800px;
+            justify-items: center;
+            margin-bottom: var(--padding);
+        }
+            #Section_StaffInfo .profile img {
+                max-width: 150px;
+                aspect-ratio: 1;
+                border-radius: 100%;
+                margin-bottom: 1em;
+            }
+            #Section_StaffInfo .profile span {
+                font-size: 1.7em;
+                font-weight: bold;
+                line-height: 1;
+                text-align: center;
+            }
+            #Section_StaffInfo .profile span#Text_StaffUsername {
+                color: var(--foreground-description);
+                font-size: 1.2em;
+                margin-top: 0.2em;
+            }
+        #Section_StaffInfo .list {
+            max-width: 800px;
+        }
+            #Section_StaffInfo .list .stack :where(> span:first-child, *:not(button) > span:first-child) {
+                color: var(--foreground-description);
+            }
+            #Section_StaffInfo .list .stack .horizontal {
+                display: grid;
+                align-items: center;
+                grid-auto-flow: column;
+                grid-auto-columns: auto max-content;
+            }
+            #Section_StaffInfo .list .stack span.selectable {
+                user-select: text;
+                -webkit-user-select: text;
+                text-align: right;
+            }
+            #Section_StaffInfo .list .stack button.plain {
+                padding: 0;
+            }
+
+    #PopOver_NewStaff .stack,
+    #PopOver_EditStaff .stack {
+        grid-auto-columns: 100px auto;
+    }
+
+    @media screen and (min-width: 1120px) {
+        #Activity_Main {
+            background: var(--gray-7);
+            box-shadow: inset -10px 0 5px -10px var(--border-sidebar);
+        }
+            #Activity_Main > section {
+                background: transparent;
+            }
+        .root .main:has(> .activity) {
+            grid-auto-flow: column;
+            grid-auto-columns: 400px auto;
+        }
+        #Section_StaffInfo.suppressanimation {
+            transition: none !important;
+        }
+            #Section_StaffInfo button.back {
+                visibility: hidden;
+            }
+        #List_Staff .stack.active {
+            background: var(--background-list-hover);
+        }
+    }
+    @media screen and (
+        (max-width: 500px) or 
+        ((min-width: 1120px) and (max-width: 1150px))
+    ) {
+        #Section_StaffInfo .list .stack:not(:has(.vertical)):not(.horizontal) {
+            grid-auto-columns: 100%;
+            grid-auto-flow: row;
+            padding: 0.5em 1em;
+            justify-content: start;
+        }
+            #Section_StaffInfo .list .stack > *:last-child,
+            #Section_StaffInfo .list .stack > span.selectable {
+                text-align: left;
+                justify-self: start;
+            }
+    }
+</style>
+
+<section id="Section_StaffList">
+    <div class="header">
+        <div class="title">Pegawai</div>
+        <div class="buttons">
+            <button id="Button_NewStaff">Tambah</button>
+            <button></button>
+            <button id="Button_Refresh" class="icon" ad-tooltip="Muat Ulang">&#xead8;</button>
+            <button id="Button_Filter" class="icon" ad-tooltip="Filter berdasarkan...">&#xf5bf;</button>
+        </div>
+        <input type="search" id="Input_Search" placeholder="Cari berdasarkan nama" ad-cancellabel="Batal"/>
+    </div>
+    <div class="content">
+        <div id="List_Staff" class="list plain">
+            <div class="progressring" id="Loading_List"></div>
+        </div>
+    </div>
+</section>
+
+<section id="Section_StaffInfo">
+    <div class="header cascaded">
+        <div class="buttons">
+            <button id="Button_MenuStaff" class="icon">&#xf153;</button>
+        </div>
+        <div class="title hide"></div>
+    </div>
+    <div class="content">
+        <div class="profile">
+            <img id="Image_StaffAvatar"/>
+            <span id="Text_StaffName"></span>
+            <span id="Text_StaffUsername"></span>
+        </div>
+        
+        <div class="list" ad-header="Informasi Pribadi">
+            <div class="stack">
+                <span>No. KTP</span>
+                <span id="Text_StaffNIK" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Nomor Telepon</span>
+                <button class="plain" ad-type="newtab" ad-goto>
+                    <span id="Text_StaffTelp"></span>
+                    <span class="icon">&#xebad;</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="list" ad-header="Pekerjaan">
+            <div class="stack">
+                <span>Cabang</span>
+                <span id="Text_StaffCabang"></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="PopOver_NewStaff" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelNewStaff">Batal</button>
+                <button id="Button_SubmitNewStaff">
+                    <div class="progressring"></div>
+                    <span>Tambah</span>
+                </button>
+            </div>
+            <span class="title">Pegawai Baru</span>
+        </div>
+        <div class="content">
+            <div class="list">
+                <div class="stack">
+                    <span>Nama</span>
+                    <input type="text" id="Input_NewStaffName" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>No. KTP</span>
+                    <input type="text" id="Input_NewStaffNIK" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>No. Telp</span>
+                    <input type="tel" id="Input_NewStaffTelp" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Username</span>
+                    <input type="text" ad-type="username" id="Input_NewStaffUsername" class="plain" />
+                </div>
+                <div class="stack">
+                    <span>Cabang</span>
+                    <select id="Select_NewStaffBranch" class="plain">
+                        <option value="">Pilih...</option>
+                    </select>
+                </div>
+                <div class="stack">
+                    <span>Kata Sandi</span>
+                    <input type="password" id="Input_NewStaffPassword" class="plain"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="PopOver_EditStaff" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelEditStaff">Batal</button>
+                <button id="Button_SubmitEditStaff">
+                    <div class="progressring"></div>
+                    <span>Simpan</span>
+                </button>
+            </div>
+            <span class="title">Edit Pegawai</span>
+        </div>
+        <div class="content">
+            <div class="list">
+                <div class="stack">
+                    <span>Nama</span>
+                    <input type="text" id="Input_EditStaffName" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>No. KTP</span>
+                    <input type="text" id="Input_EditStaffNIK" class="plain">
+                </div>
+                <div class="stack">
+                    <span>No. Telp</span>
+                    <input type="tel" id="Input_EditStaffTelp" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Username</span>
+                    <input type="text" ad-type="username" id="Input_EditStaffUsername" class="plain"/>
+                </div>
+                <div class="stack">
+                    <span>Cabang</span>
+                    <select id="Select_EditStaffBranch" class="plain">
+                        <option value="">Pilih...</option>
+                    </select>
+                </div>
+                <div class="stack">
+                    <span>Kata Sandi</span>
+                    <input type="password" id="Input_EditStaffPassword" class="plain" placeholder="(Kosongkan jika tidak diubah)"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener("resize", handleActivityResize);
+    window.addEventListener("load", handleActivityResize);
+ 
+    let suppressAnimationTimeout;
+    function handleActivityResize() {
+        if (window.innerWidth >= 1120) {
+            Activity_Main.navigateTo(0);
+            
+            if (Section_StaffInfo.parentNode == Activity_Secondary) 
+                return;
+            
+            Activity_Secondary.innerHTML = null;
+            Activity_Secondary.append(Section_StaffInfo);
+            Activity_Secondary.classList.add("grid");
+            
+            Section_StaffInfo.data = null;
+            Section_StaffInfo.activeElement?.click();
+        } 
+        else {
+            Activity_Main.append(Section_StaffInfo);
+            Activity_Main.navigateTo(0);
+        }
+    }
+
+    if ("<#? activeuser.pegawai.nama_user ?#>" != "root") {
+        Button_NewStaff.classList.add("hidden");
+        Button_MenuStaff.classList.add("hidden");
+    }
+
+    fetchStaffs();
+    fetchBranches();
+    
+    registerInput(
+        [Input_NewStaffName, Input_NewStaffNIK, Input_NewStaffTelp, Input_NewStaffUsername, Select_NewStaffBranch, Input_NewStaffPassword], 
+        Button_CancelNewStaff, Button_SubmitNewStaff, PopOver_NewStaff
+    );
+
+    registerInput(
+        [Input_EditStaffName, Input_EditStaffNIK, Input_EditStaffTelp, Input_EditStaffUsername, Select_EditStaffBranch], 
+        Button_CancelEditStaff, Button_SubmitEditStaff, PopOver_EditStaff
+    );
+
+    Button_Refresh.onclick = () => fetchStaffs();
+
+    Input_Search.oninput = function() {
+        searchStaffs(this.value);
+    }
+    
+    Button_Filter.onclick = function(event) {
+        Components.ContextMenu.Open("branches", this, event);
+    }
+    
+    Button_NewStaff.onclick = function() {
+        Input_NewStaffName.value = 
+        Input_NewStaffNIK.value = 
+        Input_NewStaffTelp.value = 
+        Input_NewStaffUsername.value = 
+        Select_NewStaffBranch.value = 
+        Input_NewStaffPassword.value = "";
+
+        PopOver_NewStaff.open(Button_NewStaff);
+    }
+
+    Button_SubmitNewStaff.onaction = function() {
+        return new Promise(async function(resolve) {
+            await $.ajax({
+                type: "POST",
+                url: "/api/staff",
+                data: {
+                    nama_user: Input_NewStaffName.value,
+                    nomor_ktp: Input_NewStaffNIK.value,
+                    nomor_telepon: Input_NewStaffTelp.value,
+                    username: Input_NewStaffUsername.value,
+                    password: Input_NewStaffPassword.value,
+                    id_cabang: Select_NewStaffBranch.value
+                },
+                success: function(data) {
+                    resolve(true);
+                    fetchStaffs();
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "add_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Menambah Pegawai",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    });
+                }
+            });
+        });
+    }
+
+    Button_MenuStaff.onclick = function(event) {
+        const staff = Section_StaffInfo.data;
+        if (!staff) 
+            return;
+
+        Components.ContextMenu.Open("menu_staff", this, event);
+    }
+
+    Button_SubmitEditStaff.onaction = function() {
+        const staff = Section_StaffInfo.data;
+        return new Promise(async function(resolve) {
+            let updateData = {
+                id_user: staff.id_user,
+                nama_user: Input_EditStaffName.value,
+                nomor_ktp: Input_EditStaffNIK.value,
+                nomor_telepon: Input_EditStaffTelp.value,
+                username: Input_EditStaffUsername.value, 
+                id_cabang: Select_EditStaffBranch.value
+            };
+
+            if (Input_EditStaffPassword.value.trim() !== "") {
+                updateData.password_pegawai = Input_EditStaffPassword.value;
+            }
+
+            await $.ajax({
+                type: "PUT",
+                url: "/api/staff",
+                data: updateData,
+                success: async function(data) {
+                    await fetchStaffs();
+                    resolve(true);
+                },
+                error: function(error) {
+                    resolve(false);
+                    Components.Notification.Send({
+                        Id: "edit_failed",
+                        Icon: "\ufe60",
+                        Title: "Gagal Menyimpan Perubahan",
+                        Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                    });
+                }
+            });
+        });
+    }
+
+    function deleteStaff() {
+        const staff = Section_StaffInfo.data;
+        if (!staff) 
+            return;
+
+        Components.ActionSheet.Open({
+            Title: "Yakin mau menghapus pegawai ini?",
+            Description: `Akun "${staff.nama_user}" akan terhapus permanen dari sistem.`,
+            Actions: [
+                {
+                    Title: "Hapus",
+                    Type: "Plain.Critical",
+                    Action: () => { 
+                        $.ajax({
+                            type: "DELETE",
+                            url: "/api/staff",
+                            data: { id_user: staff.id_user },
+                            success: function() {
+                                Section_StaffInfo.data = null;
+                                Activity_Main.navigateTo(0);
+                                Activity_Secondary.navigateTo(-1, true);
+                                fetchStaffs();
+                            },
+                            error: function(error) {
+                                Components.Notification.Send({
+                                    Id: "delete_failed",
+                                    Icon: "\ufe60",
+                                    Title: "Gagal Menghapus Pegawai",
+                                    Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                                });
+                            }
+                        });
+                    }
+                },
+                {
+                    Title: "Batal",
+                    Type: "Footer"
+                }
+            ]
+        });
+    }
+
+    let lastKeyword = "";
+    let keywordTimeout = null;
+    let lastStaffs = [];
+    
+    function searchStaffs(keyword) {
+        clearTimeout(keywordTimeout);
+        keyword = keyword.toLowerCase().trim();
+
+        if (keyword == "") {
+            List_Staff.clearItems();
+            changeFilter("branches", "");
+            appendStaff(lastStaffs);
+            List_Staff.classList.remove("loading");
+            lastKeyword = "";
+            return;
+        }
+
+        if (keyword == lastKeyword) return;
+
+        List_Staff.classList.add("loading");
+        
+        keywordTimeout = setTimeout(async function() {
+            await fetchStaffs(keyword);
+            List_Staff.classList.remove("loading");
+        }, 500);
+
+        lastKeyword = keyword;
+    }
+
+    async function fetchStaffs(keyword, filters = []) {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/staff");
+
+        if (keyword) url.searchParams.set("search", keyword);
+
+        if (filters.length > 0)
+            for (const filter of filters)
+                url.searchParams.set(filter.name, filter.value);
+
+        url = url.toString().replace(dummyHost, "");
+        const staffs = await $.get(url);
+        
+        List_Staff.clearItems();
+        appendStaff(staffs || [], !keyword == false || filters.length > 0);
+        
+        if (window['Loading_List'])
+            Loading_List.classList.add("hidden");
+    }
+
+    function appendStaff(staffs, isQuery = false) {
+        let activeElement = null;
+
+        for (const staff of staffs) {
+            const element = renderStaff(staff);
+            List_Staff.append(element);
+ 
+            if (isQuery == false && element.classList.contains("active"))
+                activeElement = element;
+        }
+        
+        if (activeElement) {
+            const activity = List_Staff.parentNode.parentNode;
+        }
+
+        if (isQuery == false)
+            lastStaffs = [...List_Staff.children].map(o => o.data).filter(Boolean) || [];
+    }
+
+    function renderStaff(staff) {
+        const nameElement = document.createElement("span");
+        nameElement.classList.add("name");
+        nameElement.innerText = staff.nama_user;
+
+        const usernameElement = document.createElement("span");
+        usernameElement.classList.add("username");
+        usernameElement.innerText = "@" + staff.username;
+
+        const primaryElement = document.createElement("div");
+        primaryElement.classList.add("primary");
+        primaryElement.append(nameElement);
+        
+        const secondaryElement = document.createElement("div");
+        secondaryElement.classList.add("secondary");
+        secondaryElement.append(usernameElement);
+
+        const headerElement = document.createElement("div");
+        headerElement.classList.add("header");
+        headerElement.append(primaryElement);
+        headerElement.append(secondaryElement);
+        
+        const avatarElement = document.createElement("img");
+        avatarElement.classList.add("avatar");
+        avatarElement.src = "/api/avatar/" + staff.id_user;
+        
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("stack");
+        itemElement.classList.add("iconed");
+        itemElement.classList.add("clickable");
+        itemElement.append(avatarElement);
+        itemElement.append(headerElement);
+        itemElement.data = staff;
+        
+        itemElement.onclick = function(isRefresh = false) {
+            Section_StaffInfo.activeElement = itemElement;
+
+            const activity = Section_StaffInfo.parentNode;
+            const activityOffset = activity == Activity_Main ? 0 : -1;
+
+            if (Section_StaffInfo.data == staff && activity == Activity_Secondary) {
+                if (isRefresh == false) {
+                    return;
+                }
+            }
+            
+            Section_StaffInfo.data = staff;
+            
+            if (activity == Activity_Secondary) {
+                for (const e of [...List_Staff.children])
+                    e.classList.remove("active");
+                itemElement.classList.add("active");
+            }
+        
+            const backButton = Section_StaffInfo.querySelector(".back");
+            if (backButton) {
+                backButton.onclick = () => activity.navigateTo(0);
+            }
+
+            if (activity.sections) {
+                activity.sections[1 + activityOffset].name = staff.nama_user;
+                activity.sections[1 + activityOffset].scrollTop = 0;
+            }
+            activity.navigateTo(1 + activityOffset, activity == Activity_Secondary);
+            
+            Image_StaffAvatar.src = avatarElement.src;
+            Text_StaffName.innerText = staff.nama_user;
+            Text_StaffUsername.innerText = "@" + staff.username;
+            
+            Text_StaffNIK.innerText = staff.nomor_ktp || "-";
+            Text_StaffCabang.innerText = staff.nama_cabang || "-";
+            
+            Text_StaffTelp.innerText = staff.nomor_telepon ? Formatter.PhoneNumber(staff.nomor_telepon) : "-";
+            if (staff.nomor_telepon) {
+                Text_StaffTelp.parentNode.setAttribute("ad-goto", "https://wa.me/" + Formatter.PhoneNumber(staff.nomor_telepon).replace(/[^0-9]/gi, ""));
+            } else {
+                Text_StaffTelp.parentNode.removeAttribute("ad-goto");
+            }
+        }
+
+        if (Section_StaffInfo?.data?.id_user == staff.id_user) {
+            itemElement.classList.add("active");
+            itemElement.click();
+        }
+
+        return itemElement;
+    }
+    
+    async function fetchBranches() {
+        Components.ContextMenu.Add("branches", []);
+        let branches = await $.get("/api/branch") || [];
+
+        branches = branches.map(function(cabang) {
+            Select_NewStaffBranch.options.add(new Option(cabang.nama_cabang, cabang.id_cabang));
+            Select_EditStaffBranch.options.add(new Option(cabang.nama_cabang, cabang.id_cabang));
+
+            return {
+                label: cabang.nama_cabang,
+                value: cabang.id_cabang
+            }
+        });
+
+        branches.unshift({ label: "Semua Cabang", value: "" });
+
+        appendFilter("branches", branches, "", function(){
+            const selectedFilter = getSelectedFilter("branches");
+            fetchStaffs(null, [
+                { name: "branch", value: selectedFilter }
+            ]);
+        });
+    } 
+
+    // Daftar menu staff
+    Components.ContextMenu.Add("menu_staff", [
+        {
+            Title: "Edit...",
+            Icon: "f7cf",
+            Action: function() {
+                const staff = Section_StaffInfo.data;
+                Input_EditStaffName.value = staff.nama_user;
+                Input_EditStaffNIK.value = staff.nomor_ktp;
+                Input_EditStaffTelp.value = staff.nomor_telepon;
+                Input_EditStaffUsername.value = staff.username; 
+                Select_EditStaffBranch.value = staff.id_cabang;
+                Input_EditStaffPassword.value = ""; 
+
+                PopOver_EditStaff.open(Button_MenuStaff);
+            }
+        },
+        "separator",
+        {
+            Title: "Hapus...",
+            Icon: "fd3c",
+            Type: "critical",
+            Action: function() {
+                deleteStaff();
+            }
+        }
+    ]);
+</script>
