@@ -127,6 +127,17 @@ const Transaksi = {
      * @param { string } plat_nomor
      * @returns { Promise<boolean> }
      */
+    Finish: async function(id_transaksi, plat_nomor) {
+        const result = await SQL.Query(`
+                UPDATE Transaksi 
+                SET
+                    tanggal_aktual_selesai = CURRENT_TIMESTAMP
+                WHERE
+                    id_transaksi = ?
+        `, id_transaksi);
+
+        return result.success;
+    },
     /**
      * Menghapus transaksi
      * @param { number } id_transaksi
