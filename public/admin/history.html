@@ -1,0 +1,997 @@
+<ad-title>Riwayat Sewa - Admin</ad-title>
+
+<style>
+    #List_Transaction .stack {
+        grid-auto-columns: auto 100px;
+    }
+        #List_Transaction > *.iconed:not(:last-child):after {
+            left: 0;
+            right: calc(100px + 2em);
+        }
+        #List_Transaction .stack .thumbnail {
+            border-radius: 7px;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: var(--overlay-7);
+            border-radius: 5px;
+            border: 1px solid var(--overlay-8);
+            object-fit: cover;
+            align-self: start;
+            margin-top: 0.5em;
+        }
+        #List_Transaction .stack .group {
+            display: grid;
+            line-height: 1.15em;
+            padding: 0.4em 0;
+            grid-auto-rows: max-content;
+        }
+            #List_Transaction .stack .primary {
+                margin-bottom: 0.5em;
+            }
+            #List_Transaction .stack .name,
+            #List_Transaction .stack .number {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: max-content auto;
+                gap: 0.5em;
+                color: var(--foreground-description);
+                margin: 0.15em 0;
+            }
+                #List_Transaction .stack .name::before,
+                #List_Transaction .stack .number::before {
+                    content: attr(icon);
+                    font-family: var(--font-icon);
+                }
+            #List_Transaction .stack .status {
+                display: grid;
+                grid-auto-flow: column;
+                justify-self: start;
+                padding: 0.2em 0.55em;
+                border-radius: 3em;
+                font-size: 0.7em;
+                font-weight: 500;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-top: 1em;
+                gap: 0.5em;
+            }
+            #List_Transaction .stack .status::before {
+                font-family: var(--font-icon);
+            }
+            #List_Transaction .stack .status.active {
+                background: #FFFBF2;
+                color: #9E6701;
+                border: 1px solid #9E6701;
+            }
+            [theme=dark]
+            #List_Transaction .stack .status.active {
+                background: #2B1E00;
+                color: #FFB50D;
+                border: none;
+            }
+            #List_Transaction .stack .status.active::before {
+                content: "\efc8";
+            }
+            #List_Transaction .stack .status.done {
+                background: #f1ffd4;
+                color: #618e2e;
+                border: 1px solid #618e2e;
+            }
+            [theme=dark]
+            #List_Transaction .stack .status.done {
+                background: #082800;
+                color: #83d96d;
+                border: none;
+            }
+                #List_Transaction .stack .status.done::before {
+                    content: "\ef1d";
+                }
+
+    [theme=light]
+    #Section_TransactionInfo {
+        background: var(--background-activity-grid);
+    }
+        #Section_TransactionInfo .thumbnail {
+            position: relative;
+            margin: -68px calc(var(--padding) * -1);
+            margin-bottom: var(--padding);
+        }
+            #Section_TransactionInfo .thumbnail img {
+                width: 100%;
+                height: 300px;
+                background: var(--gray-4);
+                object-fit: cover;
+                filter: brightness(0.6);
+            }
+            #Section_TransactionInfo .thumbnail span {
+                position: absolute;
+                bottom: var(--padding);
+                left: var(--padding);
+                right: var(--padding);
+                font-size: 1.7em;
+                font-weight: bold;
+                line-height: 1;
+            }
+        #Section_TransactionInfo .list {
+            max-width: 800px;
+        }
+            #Section_TransactionInfo .list .stack {
+                grid-auto-columns: 8em auto;
+            }
+            #Section_TransactionInfo .list .stack > *:last-child {
+                text-align: right;
+                justify-self: end;
+            }
+            #Section_TransactionInfo .list .stack :where(> span:first-child, *:not(button) > span:first-child) {
+                color: var(--foreground-description);
+            }
+            #Section_TransactionInfo .list .stack span.selectable {
+                user-select: text;
+                -webkit-user-select: text;
+                text-align: right;
+            }
+            #Section_TransactionInfo .list .stack.clickable .icon {
+                color: var(--foreground-description);
+            }
+            #Section_TransactionInfo .list .stack button.plain {
+                padding: 0;
+            }
+
+            #Section_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .progressring {
+               top: 0;
+            }
+            #Section_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack {
+                grid-auto-columns: max-content auto;
+                gap: 0.75em;
+            }
+            #Section_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack.empty {
+                grid-auto-columns: auto;
+                justify-content: center;
+                color: var(--foreground-description);
+                padding: 1.5em 0;
+            }
+                #Section_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack img {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 7px;
+                    object-fit: cover;
+                    align-self: start;
+                    background: var(--overlay-7);
+                }
+                #Section_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack span {
+                    text-align: left;
+                    justify-self: start;
+                }
+        #Section_ConditionPreview #Image_ConditionPreview {
+            width: calc(100% + var(--padding) * 2);
+            margin: 0 calc(var(--padding) * -1) var(--padding);
+        }
+        #Section_ConditionPreview #Grid_ConditionPreviewDescription {
+            font-size: 1.15em;
+        }
+
+    @media screen and (min-width: 1120px) {
+        #Activity_Main {
+            background: var(--gray-7);
+            box-shadow: inset -10px 0 5px -10px var(--border-sidebar);
+        }
+            #Activity_Main > section {
+                background: transparent;
+            }
+        .root .main:has(> .activity) {
+            grid-auto-flow: column;
+            grid-auto-columns: 400px auto;
+        }
+        #Section_TransactionInfo.suppressanimation {
+            transition: none !important;
+        }
+            #Section_TransactionInfo button.back {
+                visibility: hidden;
+            }
+        #List_Transaction .stack.active {
+            background: var(--background-list-hover);
+        }
+    }
+    @media screen and (
+        (max-width: 500px) or 
+        ((min-width: 1120px) and (max-width: 1150px))
+    ) {
+        #Section_TransactionInfo .list .stack:not(:has(.vertical)):not(.horizontal) {
+            grid-auto-columns: 100% !important;
+            grid-auto-flow: row;
+            padding: 0.5em 1em;
+            justify-content: start;
+        }
+            #Section_TransactionInfo .list .stack > *:last-child,
+            #Section_TransactionInfo .list .stack > span.selectable {
+                text-align: left !important;
+                justify-self: start !important;
+            }
+    }
+
+    #PopOver_ReturnCar #List_AddReturnCondition .stack {
+        grid-auto-columns: max-content auto;
+        gap: 0.75em;
+    }
+    #PopOver_ReturnCar #List_AddReturnCondition .stack.empty {
+        grid-auto-columns: auto;
+        justify-content: center;
+        color: var(--foreground-description);
+        padding: 1.5em 0;
+    }
+        #PopOver_ReturnCar #List_AddReturnCondition .stack img {
+            width: 50px;
+            height: 50px;
+            border-radius: 7px;
+            object-fit: cover;
+            align-self: start;
+        }
+        #PopOver_ReturnCar #List_AddReturnCondition .stack button {
+            color: var(--critical);
+            padding: 0;
+            align-self: start;
+            margin-top: 1.25em;
+        }
+
+    #PopOver_NewCondition #Image_NewCondition {
+        width: 100%;
+        border-radius: 10px;
+        aspect-ratio: 16/9;
+        background: var(--overlay-7);
+        object-fit: contain;
+    }
+    #PopOver_NewCondition #Textarea_ConditionDescription {
+        min-height: calc(5 * 1.15em);
+    }
+</style>
+
+<section id="Section_TransactionList">
+    <div class="header">
+        <div class="title">Riwayat Sewa</div>
+        <div class="buttons">
+            <button></button>
+            <button id="Button_Refresh" class="icon" ad-tooltip="Muat Ulang">&#xead8;</button>
+            <button id="Button_Filter" class="icon" ad-tooltip="Filter berdasarkan...">&#xf5bf;</button>
+        </div>
+        <input type="search" id="Input_Search" placeholder="Cari nama penyewa atau plat nomor" ad-cancellabel="Batal"/>
+    </div>
+    <div class="content">
+        <div id="List_Transaction" class="list plain">
+            <div class="progressring" id="Loading_List"></div>
+        </div>
+    </div>
+</section>
+
+<section id="Section_TransactionInfo">
+    <div class="header cascaded">
+        <div class="title hide"></div>
+        <div class="buttons dynamic" theme="dark">
+            <button id="Button_MenuTransaction">
+                <div class="progressring"></div>
+                <span class="icon">&#xf153;</span>
+            </button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="thumbnail" theme="dark">
+            <img id="Image_TransactionCar"/>
+            <span id="Text_TransactionCarName"></span>
+        </div>
+        
+        <div class="list" ad-header="Penyewa">
+            <div class="stack">
+                <span>Nama</span>
+                <span id="Text_MemberName" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Nomor Telepon</span>
+                <button class="plain" ad-type="newtab" ad-goto>
+                    <span id="Text_MemberPhoneNumber"></span>
+                    <span class="icon">&#xebad;</span>
+                </button>
+            </div>
+        </div>
+
+
+        <div class="list" ad-header="Kendaraan">
+            <div class="stack">
+                <span>Plat Nomor</span>
+                <span id="Text_CarNumber" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Status</span>
+                <span id="Text_CarStatus" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Pegawai Bertugas</span>
+                <span id="Text_StaffName" class="selectable"></span>
+            </div>
+        </div>
+
+        <div class="list" ad-header="Waktu Sewa">
+            <div class="stack">
+                <span>Tanggal Mulai</span>
+                <span id="Text_RentStartDate" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Rencana Selesai</span>
+                <span id="Text_RentExpectedEndDate" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Aktual Selesai</span>
+                <span id="Text_RentActualEndDate" class="selectable"></span>
+            </div>
+        </div>
+
+        <div class="list" ad-header="Rincian Biaya">
+            <div class="stack">
+                <span>Total Biaya Sewa</span>
+                <span id="Text_RentCarCost" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Total Denda</span>
+                <span id="Text_RentCarFine" class="selectable"></span>
+            </div>
+            <div class="stack">
+                <span>Total Keseluruhan</span>
+                <span id="Text_RentCarTotalDue" class="selectable"></span>
+            </div>
+        </div>
+
+        <div class="list" ad-header="Kondisi Awal" id="List_InitialCondition"></div>
+        <div class="list" ad-header="Kondisi Akhir" id="List_FinalCondition"></div>
+    </div>
+</section>
+
+<section id="Section_ConditionPreview">
+    <div class="header cascaded hide"></div>
+    <div class="content">
+        <img id="Image_ConditionPreview">
+        <div id="Grid_ConditionPreviewDescription"></div>
+    </div>
+</section>
+
+<div id="PopOver_ReturnCar" class="popover">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="buttons">
+                <button id="Button_CancelReturnCar">Batal</button>
+                <button id="Button_SubmitReturnCar">
+                    <div class="progressring"></div>
+                    <span>Selesaikan</span>
+                </button>
+            </div>
+            <span class="title">Selesaikan Sewa</span>
+        </div>
+        <div class="content">
+            <div class="list" id="List_AddReturnCondition" ad-header="Kondisi Akhir" ad-action="Tambah"></div>
+        </div>
+    </div>
+</div>
+
+<div class="popover" id="PopOver_NewCondition">
+    <div class="activity">
+        <div class="header cascaded">
+            <div class="title">Kondisi Baru</div>
+            <div class="buttons">
+                <button id="Button_CancelNewCondition">Batal</button>
+                <button id="Button_SubmitNewCondition">Tambah</button>
+            </div>
+        </div>
+        <div class="content">
+            <img id="Image_NewCondition"/>
+            <div class="list">
+                <div class="stack vertical">
+                    <span>Deskripsi</span>
+                    <textarea id="Textarea_ConditionDescription" maxlength="255" placeholder="Tuliskan deskripsi kondisi di sini..." class="plain"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener("resize", handleActivityResize);
+    window.addEventListener("load", handleActivityResize);
+ 
+    let suppressAnimationTimeout;
+    function handleActivityResize() {
+        if (window.innerWidth >= 1120) {
+            Activity_Main.navigateTo(0);
+            
+            if (Section_TransactionInfo.parentNode == Activity_Secondary) 
+                return;
+            
+            Activity_Secondary.innerHTML = null;
+            Activity_Secondary.append(Section_TransactionInfo);
+            Activity_Secondary.append(Section_ConditionPreview);
+            Activity_Secondary.classList.add("grid");
+            
+            Section_TransactionInfo.data = null;
+            Section_TransactionInfo.activeElement?.click();
+        } 
+        else {
+            Activity_Main.append(Section_TransactionInfo);
+            Activity_Main.append(Section_ConditionPreview);
+            Activity_Main.navigateTo(0);
+        }
+    }
+    
+    registerInput([], Button_CancelReturnCar, Button_SubmitReturnCar, PopOver_ReturnCar);
+
+    let returnConditions = [];
+    let currentFilterStatus = null;
+    let showCurrentStaffOnly = true;
+    let currentSortBy = "tanggal_mulai";
+    let currentSortOrder = "desc";
+
+    Button_SubmitReturnCar.onaction = function() {
+        return new Promise(async function(resolve) {
+            try {
+                await $.ajax({
+                    type: "PUT",
+                    url: "/api/transaction",
+                    data: {
+                        id_transaksi: Section_TransactionInfo.data.id_transaksi,
+                        plat_nomor: Section_TransactionInfo.data.plat_nomor
+                    }
+                });
+
+                for (let i = 0; i < returnConditions.length; i++) {
+                    const form = new FormData();
+                    form.append("id_transaksi", Section_TransactionInfo.data.id_transaksi);
+                    form.append("deskripsi_kondisi", returnConditions[i].description);
+                    form.append("tipe_pengecekan", "akhir");
+                    form.append("file", returnConditions[i].file);
+
+                    await $.ajax({
+                        type: "POST",
+                        url: "/api/condition",
+                        data: form,
+                        contentType: false,
+                        processData: false
+                    });
+                }
+
+                Section_TransactionInfo.data = null;
+                await fetchTransactions();
+                resolve(true);
+
+            } catch (error) {
+                resolve(false);
+                Components.Notification.Send({
+                    Id: "return_failed",
+                    Icon: "\ufe60",
+                    Title: "Gagal Menyelesaikan Sewa",
+                    Message: error.responseText || "Ada yang salah (" + error.status + ")" 
+                })
+            }
+        });
+    }
+
+    Button_MenuTransaction.onclick = function(event) {
+        const transaction = Section_TransactionInfo.data;
+        const menu = [];
+
+        if (!transaction.tanggal_aktual_selesai)
+            Components.ContextMenu.Open("menu_transaction", this, event);
+    }
+
+    List_AddReturnCondition.onaction = function() {
+        const file = document.createElement("input");
+        file.type = "file";
+        file.accept = ".png, .jpg, .jpeg, .webp";
+        file.oninput = function() {
+            const files = Array.from(this.files);
+
+            if (files.length == 0)
+                return;
+
+            if (files[0].size > 3000000)
+                return Components.Notification.Send({ 
+                    Id: "thumbnail_failed", 
+                    Title: "Gagal Menambah Foto", 
+                    Message: "Ukuran foto tidak boleh lebih besar dari 3 MB.", 
+                    Icon: "\ufe64", 
+                    Buttons: [{ Text: "Tutup" }] 
+                });
+            
+            PopOver_NewCondition.tempFile = files[0];
+            Image_NewCondition.src = URL.createObjectURL(files[0]);
+            Textarea_ConditionDescription.value = "";
+            Button_SubmitNewCondition.disabled = true;
+            PopOver_NewCondition.onopened = o => Textarea_ConditionDescription.focus();
+            PopOver_NewCondition.open(List_AddReturnCondition);
+        }
+        file.click();
+    }
+
+    Button_CancelNewCondition.onclick = function() {
+        PopOver_NewCondition.close();
+    }
+
+    Button_SubmitNewCondition.onclick = function() {
+        const file = PopOver_NewCondition.tempFile;
+        const description = Textarea_ConditionDescription.value;
+
+        returnConditions.push({
+            file: file,
+            description: description
+        });
+
+        if (returnConditions.length == 1)
+            List_AddReturnCondition.clearItems();
+
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("stack");
+        
+        const imageElement = document.createElement("img");
+        imageElement.src = URL.createObjectURL(file);
+        
+        const descriptionElement = document.createElement("span");
+        descriptionElement.innerText = description;
+
+        const actionElement = document.createElement("button");
+        actionElement.classList.add("plain");
+        actionElement.classList.add("icon");
+        actionElement.innerText = "\uf6c1";
+        actionElement.onclick = function() {
+            itemElement.remove();
+            returnConditions = returnConditions.filter(o => o.file != file);
+            if (returnConditions.length == 0) {
+                const emptyCondition = document.createElement("div");
+                emptyCondition.classList.add("stack");
+                emptyCondition.classList.add("empty");
+                emptyCondition.innerText = "Belum ada kondisi akhir";
+                List_AddReturnCondition.clearItems();
+                List_AddReturnCondition.append(emptyCondition);
+                Button_SubmitReturnCar.disabled = true;
+            }
+        }
+        
+        itemElement.append(imageElement);
+        itemElement.append(descriptionElement);
+        itemElement.append(actionElement);
+
+        List_AddReturnCondition.append(itemElement);
+        Button_SubmitReturnCar.disabled = false;
+        PopOver_NewCondition.close();
+    }
+
+    Textarea_ConditionDescription.oninput = function() {
+        if (this.value.trim() == "")
+            Button_SubmitNewCondition.disabled = true;
+        else
+            Button_SubmitNewCondition.disabled = false;
+    }
+
+    fetchTransactions();
+    
+    Button_Refresh.onclick = function() {
+        fetchTransactions();
+    }
+    Button_Filter.onclick = function(event) {
+        Components.ContextMenu.Open("filter_status", this, event);
+    }
+
+    Input_Search.oninput = function() {
+        searchTransactions(this.value);
+    }
+
+    let lastKeyword = "";
+    let keywordTimeout = null;
+
+    async function searchTransactions(keyword) {
+        clearTimeout(keywordTimeout);
+        keyword = keyword.toLowerCase().trim();
+
+        List_Transaction.classList.add("loading");
+
+        if (keyword == "" && currentFilterStatus == null) {
+            await fetchTransactions();
+            List_Transaction.classList.remove("loading");
+            lastKeyword = "";
+            return;
+        }
+
+        if (keyword == lastKeyword && !currentFilterStatus) {
+            List_Transaction.classList.remove("loading");
+            return;
+        } 
+        
+        keywordTimeout = setTimeout(async function() {
+            await fetchTransactions(keyword);
+            List_Transaction.classList.remove("loading");
+        }, 500);
+
+        lastKeyword = keyword;
+    }
+
+    async function fetchTransactions(keyword = "") {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/transaction");
+        
+        if (keyword) {
+            url.searchParams.set("search", keyword);
+        }
+        
+        if (showCurrentStaffOnly)
+            url.searchParams.set("id_pegawai", "<#? activeuser.pegawai.id_user ?#>");
+        
+        if (currentFilterStatus == "selesai")
+            url.searchParams.set("active", 0);
+        else if (currentFilterStatus == "aktif")
+            url.searchParams.set("active", 1);
+            
+        if (currentSortBy) {
+            url.searchParams.set("sort_by", currentSortBy);
+            url.searchParams.set("sort_order", currentSortOrder);
+        }
+
+        url = url.toString().replace(dummyHost, "");
+        List_Transaction.clearItems();
+        const transactions = await $.get(url);
+
+        if (!keyword) 
+            window.transactions = transactions;
+        
+        appendTransaction(transactions || [], !keyword == false ||  !!currentFilterStatus);
+
+        if (window['Loading_List'])
+            Loading_List.classList.add("hidden");
+    }
+
+    async function fetchConditions(id_transaksi) {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/condition");
+        url.searchParams.set("id_transaksi", id_transaksi);
+        url = url.toString().replace(dummyHost, "");
+
+        const loadingElement = document.createElement("div");
+        loadingElement.classList.add("progressring");
+
+        List_InitialCondition.clearItems();
+        List_InitialCondition.append(loadingElement.cloneNode());
+        List_FinalCondition.clearItems();
+        List_FinalCondition.append(loadingElement.cloneNode());
+
+        const conditions = await $.get(url) || [];
+
+        if (Section_TransactionInfo.data.id_transaksi != id_transaksi)
+            return;
+        
+        List_InitialCondition.clearItems();
+        List_FinalCondition.clearItems();
+        
+        let hasAwal = false;
+        let hasAkhir = false;
+
+        for (const cond of conditions) {
+            const itemElement = document.createElement("div");
+            itemElement.classList.add("stack");
+            itemElement.classList.add("horizontal");
+            itemElement.classList.add("clickable");
+            
+            const imageElement = document.createElement("img");
+            
+            if (cond.foto_kondisi && cond.foto_kondisi.data) {
+                const uint8Array = new Uint8Array(cond.foto_kondisi.data);
+                const blob = new Blob([uint8Array]);
+                imageElement.src = URL.createObjectURL(blob);
+            }
+            
+            const descriptionElement = document.createElement("span");
+            descriptionElement.innerText = cond.deskripsi_kondisi;
+
+            const arrowElement = document.createElement("span");
+            arrowElement.classList.add("icon");
+            arrowElement.innerText = "\uef59";
+
+            itemElement.append(imageElement);
+            itemElement.append(descriptionElement);
+            itemElement.append(arrowElement);
+            itemElement.onclick = function() {
+                Image_ConditionPreview.src = imageElement.src;
+                Grid_ConditionPreviewDescription.innerText = cond.deskripsi_kondisi;
+                
+                const activity = Section_ConditionPreview.parentNode;
+                const activityOffset = activity == Activity_Main ? 1 : 0;
+                activity.navigateTo(1 + activityOffset);
+
+                const backButton = Section_ConditionPreview.querySelector(".back");
+                backButton.onclick = () => activity.navigateTo(0 + activityOffset);
+            }
+
+            if (cond.tipe_pengecekan == "awal") {
+                List_InitialCondition.append(itemElement);
+                hasAwal = true;
+            } 
+            else if (cond.tipe_pengecekan == "akhir") {
+                List_FinalCondition.append(itemElement);
+                hasAkhir = true;
+            }
+        }
+
+        if (!hasAwal) {
+            const emptyCondition = document.createElement("div");
+            emptyCondition.classList.add("stack");
+            emptyCondition.classList.add("horizontal");
+            emptyCondition.classList.add("empty");
+            emptyCondition.innerText = "Belum ada kondisi awal";
+            List_InitialCondition.append(emptyCondition);
+        }
+        if (!hasAkhir) {
+            const emptyCondition = document.createElement("div");
+            emptyCondition.classList.add("stack");
+            emptyCondition.classList.add("horizontal");
+            emptyCondition.classList.add("empty");
+            emptyCondition.innerText = "Belum ada kondisi akhir";
+            List_FinalCondition.append(emptyCondition);
+        }
+    }
+
+    function appendTransaction(transactions, isQuery = false) {
+        let activeElement = null;
+
+        for (const transaction of transactions) {
+            const element = renderTransaction(transaction);
+            List_Transaction.append(element);
+ 
+            if (isQuery == false && element.classList.contains("active"))
+                activeElement = element;
+        }
+        
+        if (activeElement) {
+            const activity = List_Transaction.parentNode.parentNode;
+        }
+    }
+
+    function renderTransaction(transaction) {
+        const thumbnailElement = document.createElement("img");
+        thumbnailElement.src = "/api/thumbnail/car/" + transaction.plat_nomor.replaceAll(" ", "");
+        thumbnailElement.classList.add("thumbnail");
+
+        const carNameElement = document.createElement("span");
+        carNameElement.classList.add("primary");
+        carNameElement.innerText = transaction.nama_mobil;
+        
+        const numberElement = document.createElement("span");
+        numberElement.classList.add("number");
+        numberElement.innerText = transaction.plat_nomor;
+        numberElement.setAttribute("icon", "\uf75b");
+        
+        const memberNameElement = document.createElement("span");
+        memberNameElement.classList.add("name");
+        memberNameElement.innerText = transaction.nama_member;
+        memberNameElement.setAttribute("icon", "\uf83e");
+
+        const dateElement = document.createElement("span");
+        dateElement.classList.add("name");
+        dateElement.innerText = Formatter.Date(transaction.tanggal_mulai);
+        dateElement.setAttribute("icon", "\uedf4");
+
+        const statusElement = document.createElement("span");
+        statusElement.classList.add("status");
+        
+        if (transaction.tanggal_aktual_selesai) {
+            statusElement.innerText = "Selesai";
+            statusElement.classList.add("done");
+        } 
+        else {
+            statusElement.innerText = "Sedang Disewa";
+            statusElement.classList.add("active");
+        }
+        
+        const groupElement = document.createElement("div");
+        groupElement.classList.add("group");
+        groupElement.append(carNameElement);
+        groupElement.append(numberElement);
+        groupElement.append(memberNameElement);
+        groupElement.append(dateElement);
+        groupElement.append(statusElement);
+
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("stack");
+        itemElement.classList.add("clickable");
+        itemElement.classList.add("iconed");
+        itemElement.append(groupElement);
+        itemElement.append(thumbnailElement);
+        
+        itemElement.data = transaction;
+        
+        itemElement.onclick = async function(isRefresh = false) {
+            Section_TransactionInfo.activeElement = itemElement;
+
+            const activity = Section_TransactionInfo.parentNode;
+            const activityOffset = activity == Activity_Main ? 0 : -1;
+
+            if (Section_TransactionInfo.data == transaction && activity == Activity_Secondary) {
+                if (isRefresh == false) 
+                    return;
+            }
+            
+            Section_TransactionInfo.data = transaction;
+            
+            if (activity == Activity_Secondary) {
+                for (const e of [...List_Transaction.children])
+                    e.classList.remove("active");
+                itemElement.classList.add("active");
+            }
+        
+            const backButton = Section_TransactionInfo.querySelector(".back");
+            backButton.onclick = () => activity.navigateTo(0);
+            
+            activity.sections[1 + activityOffset].scrollTop = 0;
+            activity.sections[1 + activityOffset].name = transaction.nama_mobil;
+            activity.navigateTo(1 + activityOffset, activity == Activity_Secondary);
+
+            if (transaction.tanggal_aktual_selesai)
+                Button_MenuTransaction.classList.add("hidden");
+            else
+                Button_MenuTransaction.classList.remove("hidden");
+
+            Image_TransactionCar.src = thumbnailElement.src;
+            Text_TransactionCarName.innerText = transaction.nama_mobil;
+            
+            Text_MemberName.innerText = transaction.nama_member;
+            Text_MemberPhoneNumber.innerText = transaction.nomor_telepon ? Formatter.PhoneNumber(transaction.nomor_telepon) : "-";
+            if (transaction.nomor_telepon) {
+                Text_MemberPhoneNumber.parentNode.setAttribute("ad-goto", "https://wa.me/" + Formatter.PhoneNumber(transaction.nomor_telepon).replace(/[^0-9]/gi, ""));
+            } 
+            else {
+                Text_MemberPhoneNumber.parentNode.removeAttribute("ad-goto");
+            }
+            Text_CarNumber.innerText = transaction.plat_nomor;
+            Text_CarStatus.innerText = transaction.tanggal_aktual_selesai ? "Selesai" : "Sedang Disewa";
+            Text_StaffName.innerText = transaction.nama_pegawai;
+
+            Text_RentStartDate.innerText = Formatter.Date(transaction.tanggal_mulai);
+            Text_RentExpectedEndDate.innerText = Formatter.Date(transaction.tanggal_rencana_selesai);
+            Text_RentActualEndDate.innerText = Formatter.Date(transaction.tanggal_aktual_selesai);
+            Text_RentCarCost.innerText = Formatter.Amount(transaction.total_biaya_sewa);
+            Text_RentCarFine.innerText = Formatter.Amount(transaction.total_biaya_denda);
+            
+            const totalBayar = Number(transaction.total_biaya_sewa) + Number(transaction.total_biaya_denda);
+            Text_RentCarTotalDue.innerText = Formatter.Amount(totalBayar);
+
+            await fetchConditions(transaction.id_transaksi);
+        }
+
+        if (Section_TransactionInfo?.data?.id_transaksi == transaction.id_transaksi) {
+            itemElement.classList.add("active");
+            itemElement.click();
+        }
+
+        return itemElement;
+    }
+
+    Components.ContextMenu.Add("menu_transaction", [
+        {
+            Title: "Selesaikan Sewa",
+            Icon: "e8e5",
+            Action: function() {
+                returnConditions = [];
+                const emptyCondition = document.createElement("div");
+                emptyCondition.classList.add("stack");
+                emptyCondition.classList.add("empty");
+                emptyCondition.innerText = "Belum ada kondisi akhir";
+                List_AddReturnCondition.clearItems();
+                List_AddReturnCondition.append(emptyCondition);
+                
+                PopOver_ReturnCar.open(Button_MenuTransaction);
+                PopOver_ReturnCar.onopened = false;
+                Button_SubmitReturnCar.disabled = true;
+            }
+        }
+    ]);
+
+    Components.ContextMenu.Add("filter_status", [
+        "separator",
+        {
+            Title: "Dihandle oleh...",
+            Icon: "f83e",
+            value: -1,
+            Submenu: [
+                {
+                    Title: "Hanya Saya",
+                    value: "saya",
+                    Checked: true,
+                    Action: function() { StaffFilter_Change(true); }
+                },
+                {
+                    Title: "Semua Pegawai",
+                    value: "semua",
+                    Checked: false,
+                    Action: function() { StaffFilter_Change(false); }
+                }
+            ]
+        },
+        "separator",
+        {
+            Title: "Urutkan...",
+            Icon: "eb8b",
+            value: -1,
+            Submenu: [
+                {
+                    Title: "Waktu Mulai Sewa",
+                    value: "tanggal_mulai",
+                    Checked: true,
+                    Icon: "eb26",
+                    Action: function() { Sort_Change("tanggal_mulai"); }
+                },
+                {
+                    Title: "Nama Penyewa",
+                    value: "nama_member",
+                    Checked: false,
+                    Icon: null,
+                    Action: function() { Sort_Change("nama_member"); }
+                },
+                {
+                    Title: "Nama Mobil",
+                    value: "nama_mobil",
+                    Checked: false,
+                    Icon: null,
+                    Action: function() { Sort_Change("nama_mobil"); }
+                }
+            ]
+        }
+    ]);
+
+    const statusItems = [
+        { label: "Semua", value: null },
+        { label: "Sedang Disewa", value: "aktif" },
+        { label: "Selesai", value: "selesai" }
+    ];
+
+    appendFilter("filter_status", statusItems, null, async function() {
+        currentFilterStatus = getSelectedFilter("filter_status");
+        await searchTransactions(Input_Search.value);
+    });
+
+    function setSort(by, order) {
+        currentSortBy = by;
+        currentSortOrder = order;
+        searchTransactions(Input_Search.value);
+    }
+
+    function StaffFilter_Change(isOnlyMe) {
+        showCurrentStaffOnly = isOnlyMe;
+
+        const context = Components.ContextMenu.List.find(o => o.id == "filter_status");
+        // Cari submenu yang judulnya ada kata "Dihandle" biar fleksibel walaupun urutan index bergeser
+        const staffMenu = context.commands.find(c => c.Title && c.Title.includes("Dihandle"));
+        
+        if (staffMenu && staffMenu.Submenu) {
+            staffMenu.Submenu[0].Checked = isOnlyMe;
+            staffMenu.Submenu[1].Checked = !isOnlyMe;
+        }
+
+        searchTransactions(Input_Search.value);
+    }
+
+    function Sort_Change(value) {
+        if (currentSortBy == value) {
+            currentSortOrder = currentSortOrder == "asc" ? "desc" : "asc";
+        } 
+        else {
+            currentSortBy = value;
+            currentSortOrder = "asc"; 
+        }
+
+        const context = Components.ContextMenu.List.find(o => o.id == "filter_status");
+        const submenu = context.commands[context.commands.length - 1].Submenu;
+
+        for (const item of submenu) {
+            if (item.value == value) {
+                item.Checked = true;
+                item.Icon = currentSortOrder == "asc" ? "ebd7" : "eb26";
+            } 
+            else {
+                item.Checked = false;
+                item.Icon = null;
+            }
+        }
+
+        searchTransactions(Input_Search.value);
+    }
+</script>

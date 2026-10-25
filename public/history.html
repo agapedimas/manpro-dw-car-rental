@@ -1,0 +1,606 @@
+<ad-title>Riwayat</ad-title>
+
+<style>
+    @import url("/member.css");
+
+    #List_Transaction .item .primary {
+        margin-bottom: 0.5em;
+    }
+    #List_Transaction .item .name,
+    #List_Transaction .item .number {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: max-content auto;
+        gap: 0.5em;
+        color: var(--foreground-description);
+        margin: 0.15em 0;
+    }
+        #List_Transaction .item .name::before,
+        #List_Transaction .item .number::before {
+            content: attr(icon);
+            font-family: var(--font-icon);
+        }
+    #List_Transaction .item .status {
+        display: grid;
+        grid-auto-flow: column;
+        justify-self: start;
+        padding: 0.5em 0.65em;
+        border-radius: 3em;
+        font-size: 0.7em;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 1em;
+        gap: 0.5em;
+    }
+    #List_Transaction .item .status::before {
+        font-family: var(--font-icon);
+    }
+    #List_Transaction .item .status.active {
+        background: #FFFBF2;
+        color: #9E6701;
+        border: 1px solid #9E6701;
+    }
+    [theme=dark]
+    #List_Transaction .item .status.active {
+        background: #2B1E00;
+        color: #FFB50D;
+        border: none;
+    }
+    #List_Transaction .item .status.active::before {
+        content: "\efc8";
+    }
+    #List_Transaction .item .status.done {
+        background: #f1ffd4;
+        color: #618e2e;
+        border: 1px solid #618e2e;
+    }
+    [theme=dark]
+    #List_Transaction .item .status.done {
+        background: #082800;
+        color: #83d96d;
+        border: none;
+    }
+        #List_Transaction .item .status.done::before {
+            content: "\ef1d";
+        }
+
+    #PopOver_TransactionInfo .thumbnail {
+        position: relative;
+        margin: -68px calc(var(--padding) * -1);
+        margin-bottom: var(--padding);
+    }
+        #PopOver_TransactionInfo .thumbnail img {
+            width: 100%;
+            height: 300px;
+            background: var(--gray-4);
+            object-fit: cover;
+            filter: brightness(0.6);
+        }
+        #PopOver_TransactionInfo .thumbnail span {
+            position: absolute;
+            bottom: var(--padding);
+            left: var(--padding);
+            right: var(--padding);
+            font-size: 1.7em;
+            font-weight: bold;
+            line-height: 1;
+            color: white;
+        }
+    #PopOver_TransactionInfo .list {
+        max-width: 800px;
+    }
+        #PopOver_TransactionInfo .list .stack {
+            grid-auto-columns: 8em auto;
+        }
+        #PopOver_TransactionInfo .list .stack > *:last-child {
+            text-align: right;
+            justify-self: end;
+        }
+        #PopOver_TransactionInfo .list .stack :where(> span:first-child, *:not(button) > span:first-child) {
+            color: var(--foreground-description);
+        }
+        #PopOver_TransactionInfo .list .stack span.selectable {
+            user-select: text;
+            -webkit-user-select: text;
+            text-align: right;
+        }
+        #PopOver_TransactionInfo .list .stack.clickable .icon {
+            color: var(--foreground-description);
+        }
+        #PopOver_TransactionInfo .list .stack button.plain {
+            padding: 0;
+        }
+
+        #PopOver_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .progressring {
+            top: 0;
+        }
+        #PopOver_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack {
+            grid-auto-columns: max-content auto;
+            gap: 0.75em;
+        }
+            #PopOver_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack img {
+                width: 50px;
+                height: 50px;
+                border-radius: 7px;
+                object-fit: cover;
+                align-self: start;
+                background: var(--overlay-7);
+            }
+            #PopOver_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack span {
+                text-align: left;
+                justify-self: start;
+            }
+            #PopOver_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack.empty {
+                grid-auto-columns: auto;
+                justify-content: center;
+                color: var(--foreground-description);
+                padding: 1.5em 0;
+            }
+            #PopOver_TransactionInfo .list:is(#List_InitialCondition, #List_FinalCondition) .stack.empty span {
+                text-align: center;
+                color: var(--foreground-description);
+            }
+            #PopOver_TransactionInfo #Section_ConditionPreview #Image_ConditionPreview {
+                width: calc(100% + var(--padding) * 2);
+                margin: 0 calc(var(--padding) * -1) var(--padding);
+            }
+            #PopOver_TransactionInfo #Section_ConditionPreview #Grid_ConditionPreviewDescription {
+                
+            }
+
+    @media screen and (max-width: 500px) {
+        #PopOver_TransactionInfo .list .stack:not(:has(.vertical)):not(.horizontal) {
+            grid-auto-columns: 100% !important;
+            grid-auto-flow: row;
+            padding: 0.5em 1em;
+            justify-content: start;
+        }
+            #PopOver_TransactionInfo .list .stack > *:last-child,
+            #PopOver_TransactionInfo .list .stack > span.selectable {
+                text-align: left !important;
+                justify-self: start !important;
+            }
+    }
+</style>
+
+<section>
+    <div class="header">
+        <div class="title">Riwayat</div>
+    </div>
+    
+    <div class="heading" id="Grid_Heading">
+        <div class="navigation">
+            <div class="links">
+                <a ad-goto="/">Beranda</a>
+                <a class="active">Riwayat</a>
+            </div>
+            <br/>
+            <button id="Button_Account" class="hidden">
+                <img id="Image_Avatar"/>
+                <span><#? activeuser.member.nama_user ?#></span>
+            </button>
+            <button id="Button_SignIn" ad-goto="/signin">
+                <span>Masuk</span>
+            </button>
+        </div>
+        <br/>
+        <h3>Riwayat Sewa</h3>
+        <div id="Grid_FilterFields">
+            <input id="Input_Search" type="search" placeholder="Cari nama mobil atau plat nomor" ad-cancellabel="Batal"/>
+            <button id="Button_Filter" class="icon" ad-tooltip="Filter berdasarkan...">&#xf5bf;</button>
+        </div>
+    </div>
+    <div class="content loading" id="Content_Main">
+        <div class="progressring" id="Loading_Main"></div>
+        <section class="no_results hidden" id="Empty_State">
+            <span>Tidak Ada Hasil</span>
+            <span>Coba cari yang lain.</span>
+        </section>
+        <section ad-header>
+            <div class="items" id="List_Transaction"></div>
+        </div>
+    </div>
+</section>
+
+<div class="popover" id="PopOver_TransactionInfo">
+    <div class="activity">
+        <section>
+            <div class="header cascaded">
+                <div class="title hide"></div>
+            </div>
+            <div class="content">
+                <div class="thumbnail" theme="dark">
+                    <img id="Image_TransactionCar"/>
+                    <span id="Text_TransactionCarName"></span>
+                </div>
+                
+                <div class="list" ad-header="Kendaraan">
+                    <div class="stack">
+                        <span>Plat Nomor</span>
+                        <span id="Text_CarNumber" class="selectable"></span>
+                    </div>
+                    <div class="stack">
+                        <span>Status</span>
+                        <span id="Text_CarStatus" class="selectable"></span>
+                    </div>
+                    <div class="stack">
+                        <span>Pegawai Bertugas</span>
+                        <span id="Text_StaffName" class="selectable"></span>
+                    </div>
+                </div>
+
+                <div class="list" ad-header="Waktu Sewa">
+                    <div class="stack">
+                        <span>Tanggal Mulai</span>
+                        <span id="Text_RentStartDate" class="selectable"></span>
+                    </div>
+                    <div class="stack">
+                        <span>Rencana Selesai</span>
+                        <span id="Text_RentExpectedEndDate" class="selectable"></span>
+                    </div>
+                    <div class="stack">
+                        <span>Aktual Selesai</span>
+                        <span id="Text_RentActualEndDate" class="selectable"></span>
+                    </div>
+                </div>
+
+                <div class="list" ad-header="Rincian Biaya">
+                    <div class="stack">
+                        <span>Total Biaya Sewa</span>
+                        <span id="Text_RentCarCost" class="selectable"></span>
+                    </div>
+                    <div class="stack">
+                        <span>Total Denda</span>
+                        <span id="Text_RentCarFine" class="selectable"></span>
+                    </div>
+                    <div class="stack">
+                        <span>Total Keseluruhan</span>
+                        <span id="Text_RentCarTotalDue" class="selectable"></span>
+                    </div>
+                </div>
+
+                <div class="list" ad-header="Kondisi Awal" id="List_InitialCondition"></div>
+                <div class="list" ad-header="Kondisi Akhir" id="List_FinalCondition"></div>
+            </div>
+        </section>
+        <section id="Section_ConditionPreview">
+            <div class="header cascaded hide"></div>
+            <div class="content">
+                <img id="Image_ConditionPreview">
+                <div id="Grid_ConditionPreviewDescription"></div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    if (!"<#? activeuser.member.id_user ?#>") {
+        Loading_Main.classList.add("hidden");
+        Content_Main.classList.remove("loading");
+        Empty_State.classList.remove("hidden");
+    }
+
+    Content_Main.parentNode.onscroll = function() {
+        if (this.scrollTop > 250)
+            Grid_Heading.classList.add("scroll");
+        else
+            Grid_Heading.classList.remove("scroll");
+    }
+    List_Transaction.clearItems = function() {
+        this.innerHTML = "";
+    }
+
+    let currentFilterStatus = null;
+    let currentSortBy = "tanggal_mulai";
+    let currentSortOrder = "desc";
+
+    Components.ContextMenu.Add("filter_status", []);
+
+    const statusItems = [
+        { label: "Semua", value: null },
+        { label: "Sedang Disewa", value: "aktif" },
+        { label: "Selesai", value: "selesai" }
+    ];
+
+    appendFilter("filter_status", statusItems, null, async function() {
+        currentFilterStatus = getSelectedFilter("filter_status");
+        await searchTransactions(Input_Search.value);
+    });
+    
+    const filterContext = Components.ContextMenu.List.find(o => o.id == "filter_status");
+
+    filterContext.commands.push("separator");
+    filterContext.commands.push({
+        Title: "Urutkan...",
+        value: -1,
+        Icon: "eb8b", 
+        Submenu: [
+            {
+                Title: "Waktu Mulai Sewa",
+                value: "tanggal_mulai",
+                Checked: true,
+                Icon: "eb26", 
+                Action: function() { Sort_Change("tanggal_mulai"); }
+            },
+            {
+                Title: "Nama Mobil",
+                value: "nama_mobil",
+                Checked: false,
+                Icon: null,
+                Action: function() { Sort_Change("nama_mobil"); }
+            }
+        ]
+    });
+
+    function Sort_Change(value) {
+        if (currentSortBy == value) {
+            currentSortOrder = currentSortOrder == "asc" ? "desc" : "asc";
+        } 
+        else {
+            currentSortBy = value;
+            currentSortOrder = "asc"; 
+        }
+
+        const context = Components.ContextMenu.List.find(o => o.id == "filter_status");
+        const submenu = context.commands[context.commands.length - 1].Submenu;
+
+        for (const item of submenu) {
+            if (item.value == value) {
+                item.Checked = true;
+                item.Icon = currentSortOrder == "asc" ? "ebd7" : "eb26";
+            } 
+            else {
+                item.Checked = false;
+                item.Icon = null;
+            }
+        }
+
+        searchTransactions(Input_Search.value);
+    }
+
+    Button_Filter.onclick = function(event) {
+        Components.ContextMenu.Open("filter_status", this, event);
+    }
+
+    if ("<#? activeuser.member.id_user ?#>") {
+        window.onload = async function() {
+            await fetchTransactions();
+            Loading_Main.classList.add("hidden");
+            Content_Main.classList.remove("loading");
+        }
+    }
+
+    Input_Search.oninput = function() {
+        searchTransactions(this.value);
+    }
+
+    let lastKeyword = "";
+    let keywordTimeout = null;
+
+    async function searchTransactions(keyword) {
+        clearTimeout(keywordTimeout);
+
+        keyword = keyword.toLowerCase().trim();
+        Content_Main.classList.add("loading");
+
+        if (keyword == "" && currentFilterStatus == null) {
+            await fetchTransactions();
+            Content_Main.classList.remove("loading");
+            lastKeyword = "";
+            return;
+        }
+
+        if (keyword == lastKeyword && !currentFilterStatus) {
+            Content_Main.classList.remove("loading");
+            return;
+        }
+        
+        keywordTimeout = setTimeout(async function() {
+            await fetchTransactions(keyword);
+            Content_Main.classList.remove("loading");
+        }, 500);
+
+        lastKeyword = keyword;
+    }
+
+    async function fetchTransactions(keyword = "") {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/transaction");
+        url.searchParams.set("id_member", "<#? activeuser.member.id_user ?#>");
+        
+        if (keyword)
+            url.searchParams.set("search", keyword);
+
+        if (currentFilterStatus == "selesai")
+            url.searchParams.set("active", 0);
+        else if (currentFilterStatus == "aktif")
+            url.searchParams.set("active", 1);
+
+        if (currentSortBy) {
+            url.searchParams.set("sort_by", currentSortBy);
+            url.searchParams.set("sort_order", currentSortOrder);
+        }
+
+        url = url.toString().replace(dummyHost, "");
+        List_Transaction.clearItems();
+
+        const transactions = await $.get(url) || [];
+
+        if (transactions.length === 0) {
+            Empty_State.classList.remove("hidden");
+        } 
+        else {
+            Empty_State.classList.add("hidden");
+            appendTransaction(transactions);
+        }
+    }
+
+    async function fetchConditions(id_transaksi) {
+        const dummyHost = "http://aga.pe";
+        let url = new URL(dummyHost + "/api/condition");
+        url.searchParams.set("id_transaksi", id_transaksi);
+        url = url.toString().replace(dummyHost, "");
+
+        const loadingElement = document.createElement("div");
+        loadingElement.classList.add("progressring");
+
+        List_InitialCondition.clearItems();
+        List_InitialCondition.append(loadingElement.cloneNode());
+        List_FinalCondition.clearItems();
+        List_FinalCondition.append(loadingElement.cloneNode());
+
+        const conditions = await $.get(url) || [];
+
+        if (PopOver_TransactionInfo.data.id_transaksi != id_transaksi)
+            return;
+        
+        List_InitialCondition.clearItems();
+        List_FinalCondition.clearItems();
+
+        let hasAwal = false;
+        let hasAkhir = false;
+
+        for (const cond of conditions) {
+            const itemElement = document.createElement("div");
+            itemElement.classList.add("stack");
+            itemElement.classList.add("horizontal");
+            itemElement.classList.add("clickable");
+            
+            const imageElement = document.createElement("img");
+            
+            if (cond.foto_kondisi && cond.foto_kondisi.data) {
+                const uint8Array = new Uint8Array(cond.foto_kondisi.data);
+                const blob = new Blob([uint8Array]);
+                imageElement.src = URL.createObjectURL(blob);
+            }
+            
+            const descriptionElement = document.createElement("span");
+            descriptionElement.innerText = cond.deskripsi_kondisi;
+
+            const arrowElement = document.createElement("span");
+            arrowElement.classList.add("icon");
+            arrowElement.innerText = "\uef59";
+
+            itemElement.append(imageElement);
+            itemElement.append(descriptionElement);
+            itemElement.append(arrowElement);
+            itemElement.onclick = function() {
+                Image_ConditionPreview.src = imageElement.src;
+                Grid_ConditionPreviewDescription.innerText = cond.deskripsi_kondisi;
+                
+                const activity = Section_ConditionPreview.parentNode;
+                activity.navigateTo(1);
+                Section_ConditionPreview.scrollTop = 0;
+            }
+
+            if (cond.tipe_pengecekan == "awal") {
+                List_InitialCondition.append(itemElement);
+                hasAwal = true;
+            } 
+            else if (cond.tipe_pengecekan == "akhir") {
+                List_FinalCondition.append(itemElement);
+                hasAkhir = true;
+            }
+        }
+
+        if (!hasAwal) {
+            const emptyCondition = document.createElement("div");
+            emptyCondition.classList.add("stack");
+            emptyCondition.classList.add("horizontal");
+            emptyCondition.classList.add("empty");
+            emptyCondition.innerText = "Belum ada kondisi awal";
+            List_InitialCondition.append(emptyCondition);
+        }
+        if (!hasAkhir) {
+            const emptyCondition = document.createElement("div");
+            emptyCondition.classList.add("stack");
+            emptyCondition.classList.add("horizontal");
+            emptyCondition.classList.add("empty");
+            emptyCondition.innerText = "Belum ada kondisi akhir";
+            List_FinalCondition.append(emptyCondition);
+        }
+    }
+
+    function appendTransaction(transactions) {
+        for (const transaction of transactions) {
+            const element = renderTransaction(transaction);
+            List_Transaction.append(element);
+        }
+    }
+
+    function renderTransaction(transaction) {
+        const thumbnailElement = document.createElement("img");
+        thumbnailElement.src = "/api/thumbnail/car/" + transaction.plat_nomor.replaceAll(" ", "");
+        thumbnailElement.classList.add("thumbnail");
+
+        const carNameElement = document.createElement("span");
+        carNameElement.classList.add("primary");
+        carNameElement.innerText = transaction.nama_mobil;
+
+        const numberElement = document.createElement("span");
+        numberElement.classList.add("number");
+        numberElement.innerText = transaction.plat_nomor;
+        numberElement.setAttribute("icon", "\uf75b");
+        
+        const dateElement = document.createElement("span");
+        dateElement.classList.add("name");
+        dateElement.innerText = Formatter.Date(transaction.tanggal_mulai);
+        dateElement.setAttribute("icon", "\uedf4");
+
+        const statusElement = document.createElement("span");
+        statusElement.classList.add("status");
+        
+        if (transaction.tanggal_aktual_selesai) {
+            statusElement.innerText = "Selesai";
+            statusElement.classList.add("done");
+        } 
+        else {
+            statusElement.innerText = "Sedang Disewa";
+            statusElement.classList.add("active");
+        }
+
+        const groupElement = document.createElement("div");
+        groupElement.classList.add("group");
+        groupElement.append(carNameElement);
+        groupElement.append(numberElement);
+        groupElement.append(dateElement);
+        groupElement.append(statusElement);
+
+        const itemElement = document.createElement("div");
+        itemElement.classList.add("item");
+        itemElement.append(thumbnailElement);
+        itemElement.append(groupElement);
+        itemElement.data = transaction;
+
+        itemElement.onclick = async function() {
+            const activity = PopOver_TransactionInfo.container.children[0];
+            activity.sections[0].name = transaction.nama_mobil;
+            activity.sections[0].scrollTop = 0;
+            activity.navigateTo(0, true);
+
+            Image_TransactionCar.src = thumbnailElement.src;
+            Text_TransactionCarName.innerText = transaction.nama_mobil;
+            
+            Text_CarNumber.innerText = transaction.plat_nomor;
+            Text_CarStatus.innerText = transaction.tanggal_aktual_selesai ? "Selesai" : "Sedang Disewa";
+            Text_StaffName.innerText = transaction.nama_pegawai;
+
+            Text_RentStartDate.innerText = Formatter.Date(transaction.tanggal_mulai);
+            Text_RentExpectedEndDate.innerText = Formatter.Date(transaction.tanggal_rencana_selesai);
+            Text_RentActualEndDate.innerText = Formatter.Date(transaction.tanggal_aktual_selesai);
+            Text_RentCarCost.innerText = Formatter.Amount(transaction.total_biaya_sewa);
+            Text_RentCarFine.innerText = Formatter.Amount(transaction.total_biaya_denda);
+            
+            const totalBayar = Number(transaction.total_biaya_sewa) + Number(transaction.total_biaya_denda);
+            Text_RentCarTotalDue.innerText = Formatter.Amount(totalBayar);
+
+            PopOver_TransactionInfo.open(thumbnailElement);
+            PopOver_TransactionInfo.data = transaction;
+
+            await fetchConditions(transaction.id_transaksi);
+        }
+
+        return itemElement;
+    }
+</script>
