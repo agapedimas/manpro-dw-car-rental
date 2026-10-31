@@ -319,6 +319,32 @@ const Mobil = {
             }
         }
     },
+
+    PriceHistory: {
+        /**
+         * Mendapatkan riwayat perubahan harga mobil
+         * @param { string } plat_nomor 
+         * @returns { Promise<Array<{
+         *      id_rekap_harga: number,
+         *      plat_nomor: string,
+         *      tanggal_mulai: string,
+         *      tanggal_selesai: string?,
+         *      biaya_harian: number,
+         *      jenis_biaya: "sewa" | "denda"
+         * }>>}
+         */
+        Get: async function(plat_nomor) {
+            const result = 
+                await SQL.Query(`
+                    SELECT * FROM RekapHarga
+                    WHERE plat_nomor = ?
+                    ORDER BY 
+                        tanggal_mulai DESC, 
+                        id_rekap_harga ASC
+                `, plat_nomor);
+            return result.data;
+        }
+    }
 };
 
 module.exports = Mobil;
