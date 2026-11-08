@@ -1,0 +1,230 @@
+.activity section:has(#Content_Main) > .header {
+    display: none;
+}
+
+.heading {
+    display: grid;
+    width: calc(1000px + var(--padding));
+    max-width: 100%;
+    margin: 0 auto;
+    padding: var(--padding);
+    position: sticky;
+    top: -265px;
+    height: 350px;
+    grid-auto-rows: max-content auto max-content max-content;
+    z-index: 50;
+}
+    .heading::before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 265px;
+        left: -50vw;
+        right: -50vw;
+        bottom: 0;
+        background: linear-gradient(var(--dim), transparent 70%);
+        z-index: -1;
+        backdrop-filter: var(--filter-blur);
+        mask-image: linear-gradient(black 20%, transparent);
+        transition: 0.5s ease-out bottom;
+        pointer-events: none;
+    }
+    .heading.scroll::before {
+        bottom: -50px;
+    }
+    .heading .navigation {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: max-content auto max-content;
+        align-items: center;
+        height: 50px;
+    }
+        .heading .navigation .links {
+            display: grid;
+            grid-auto-flow: column;
+            gap: 1.5em;
+        }
+            .heading .navigation .links a {
+                background-color: transparent;
+                border-radius: 7px;
+                padding: 0.5em;
+                margin: -0.5em;
+            }
+            .heading .navigation .links a.active {
+                font-weight: bold;
+            }
+            .heading .navigation .links a:hover {
+                background-color: var(--background-input-hover);
+            }
+            .heading .navigation .links a:active {
+                background-color: var(--background-input-hover);
+            }
+        .heading .navigation #Button_Account {
+            display: grid;
+            grid-auto-flow: column;
+            gap: 0.65em;
+            padding: 5px;
+            border-radius: 100px;
+        }
+            .heading .navigation #Button_Account img {
+                display: block;
+                width: 36px;
+                aspect-ratio: 1;
+                border-radius: 100%;
+            }
+            .heading .navigation #Button_Account span {
+                margin-right: 0.75em;
+            }
+    .heading h3 {
+        text-align: center;
+        margin: 0 auto 50px;
+    }
+    .heading #Grid_FilterFields {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: auto max-content;
+        gap: 10px;
+        width: 100%;
+        max-width: 600px;
+        justify-self: center;
+    }
+        .heading #Grid_FilterFields input {
+            height: 2.5em;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            transition: var(--animation) width;
+        }
+        .heading #Grid_FilterFields #Button_Filter {
+            backdrop-filter: blur(10px);
+        }
+        
+    input[type="search"]::-webkit-search-cancel-button 
+    {
+        right: 0.35em;
+    }
+    .InputContainer_Textbox:has(input[type=search]):before{
+        z-index: 1;
+    }
+
+.content {
+    transition: 0.25s opacity !important;
+    --thumbnail-height: 155px;
+}
+.content.loading {
+    pointer-events: none;
+    opacity: 0.5;
+}
+    .content .progressring {
+        margin: 0 auto;
+        width: 25px;
+    }
+    .content .thumbnail {
+        object-fit: cover;
+    }
+#Content_Main {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+#Grid_Account
+{
+    display: grid;
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    justify-items: center;
+    text-align: center;
+    align-items: center;
+    gap: 1em 1.5em;
+    padding: var(--padding);
+}
+    #Grid_Account .avatar
+    {
+        position: relative;
+        border-radius: 100%;
+        overflow: hidden;
+    }
+    #Grid_Account .avatar.loading
+    {
+        pointer-events: none;
+    }
+        #Grid_Account .avatar::before
+        {
+            content: "\edfc";
+            position: absolute;
+            bottom: 0;
+            display: grid;
+            font-family: var(--font-icon);
+            font-size: 1.3em;
+            width: 100%;
+            height: 35px;
+            background: #00000080;
+            color: white;
+            align-items: center;
+            justify-content: center;
+            transition: 0.5s var(--key-animation) transform;
+            transform: translateY(100%);
+            z-index: 1;
+        }
+        #Grid_Account .avatar:not(.loading):hover::before
+        {
+            transform: translateY(0);
+        }
+        #Grid_Account .avatar img
+        {
+            display: block;
+            width: 100%;
+            max-width: 150px;
+            aspect-ratio: 1 / 1;
+            transition: 0.1s filter;
+        }
+        #Grid_Account .avatar:hover img
+        {
+            filter: var(--filter-accent-plain-hover);
+        }
+        #Grid_Account .avatar:active img
+        {
+            filter: var(--filter-accent-plain-active);
+        }
+        #Grid_Account .avatar.loading img
+        {
+            filter: brightness(0.3);
+        }
+        #Grid_Account .avatar .progressring
+        {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 1;
+        }
+        #Grid_Account .avatar.loading .progressring
+        {
+            display: block;
+        }
+    #Grid_Account .details
+    {
+        display: block;
+    }
+        #Grid_Account .details .name
+        {    
+            font-size: 1.5em;
+            font-family: var(--font-semibold);
+        }
+        #Grid_Account .details .description
+        {    
+            font-size: 1.5em;
+            font-family: var(--font-semibold);
+            color: var(--foreground-description);
+        }
+        #Grid_Account .details button
+        {
+            margin: 1em 0 0;
+            padding: 0.75em;
+            border-radius: 10px;
+            font-weight: 500;
+            min-width: 100%;
+        }

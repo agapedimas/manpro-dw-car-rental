@@ -1,0 +1,12 @@
+@import url("/list.css");
+
+.root {
+    grid-auto-columns: auto;
+    grid-auto-rows: auto;
+    grid-template-areas: "Content";
+}
+    .root > .main,
+    .root > .main > .activity,
+    .root > .main > .activity > section {
+        background: inherit;
+    }

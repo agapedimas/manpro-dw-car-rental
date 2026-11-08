@@ -1,0 +1,132 @@
+@import url("/list.css");
+
+.root {
+    background: var(--background-page);
+}
+section.main:has(> .activity) {
+    background: inherit;
+}
+
+.activity,
+.activity > section {
+    background-color: inherit;
+}
+
+.cards {
+    display: grid;
+    gap: calc(var(--padding) / 2);
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+.searching .cards {
+    display: none;
+}
+    .cards .card {
+        display: grid;
+        background: var(--overlay-7);
+        border: 1px solid var(--background-activity-header);
+        border-radius: 10px;
+        padding: 1em;
+    }
+
+.list.plain:not(.cards + .list.plain) {
+    margin-top: -1em;
+}
+.list {
+    transition: 0.25s opacity;
+}
+.list.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+    section[ad-header]:has(.items) > .progressring,
+    .progressring:has(~ .list),
+    .list > .progressring {
+        padding: 0 !important;
+        margin: 0 auto !important;
+        width: 25px;
+        top: var(--padding);
+        background: transparent;
+    }
+    .list > .stack:has(.header .primary):not(.iconed) {
+        grid-auto-columns: auto max-content max-content;
+        gap: 10px;
+    }
+    .list .stack .header:has(.primary) {
+        display: grid;
+        padding: 0.5em 0;
+    }
+            .list .stack .header .primary {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: auto max-content;
+                align-items: center;
+                font-weight: 800;
+            }
+                .list .stack .header .primary .icon {
+                    font-weight: 400;
+                    font-size: 0.8rem;
+                    color: var(--foreground-description);
+                }
+                .list .stack .header .primary .status {
+                    font-size: 0.75rem;
+                    color: var(--foreground-description);
+                    background: var(--background-input);
+                    padding: 0.25em 0.65em;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.025em;
+                }
+            .list .stack .header .secondary {
+                display: grid;
+                grid-auto-flow: column;
+                grid-auto-columns: auto max-content;
+                align-items: center;
+            }
+        .list .stack .avatar {
+            width: 30px;
+            aspect-ratio: 1;
+            border-radius: 100%;
+        }
+        .list .stack .action {
+            display: grid;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border-radius: 100%;
+            font-size: 0.9em;
+            color: var(--foreground-description);
+            align-items: center;
+            justify-items: center;
+        }
+            .list .stack .action::before {
+                content: "\f153";
+                font-family: var(--font-icon);
+            }
+        .list .stack > .icon {
+            color: var(--foreground-description);
+            font-size: 0.85em;
+        }
+.popover .stack span:first-child {
+    font-weight: 600;
+}
+.popover .stack textarea {
+    min-height: 200px;
+    white-space: pre-wrap;
+}
+
+
+*:has(.list > .stack) > .error {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content auto;
+    gap: 0.5em;
+    color: var(--notice);
+    margin: -1em 0 0.5em 0;
+    font-size: 0.85em;
+    letter-spacing: 0.015em;
+}
+    *:has(.list > .stack) > .error::before {
+        content: "\f1aa";
+        font-family: var(--font-icon);
+    }

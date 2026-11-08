@@ -1,0 +1,177 @@
+.loading > section.no_results,
+*:has(> section[ad-header] .items:not(:empty)) > section.no_results {
+    display: none;
+}
+section.no_results {
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    height: calc(100vh - 350px - var(--padding));
+}
+    section.no_results span:first-child{
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    section.no_results span:last-child{
+        font-size: 1.15em;
+        color: var(--foreground-description);
+    }
+section[ad-header] {
+    position: relative;
+}
+section[ad-header]:has(.items:empty):not(:has(> .progressring:not(.hidden))) {
+    display: none;
+}
+section[ad-header]:has(.arrow.prev.hidden):has(.arrow.next:not(.hidden)) .items {
+    mask-image: linear-gradient(90deg, transparent, black 0, black calc(100% - var(--padding)), transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 0, black calc(100% - var(--padding)), transparent);
+}
+section[ad-header]:has(.arrow.prev:not(.hidden)):has(.arrow.next:not(.hidden)) .items {
+    mask-image: linear-gradient(90deg, transparent, black var(--padding), black calc(100% - var(--padding)), transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black var(--padding), black calc(100% - var(--padding)), transparent);
+}
+section[ad-header]:has(.arrow.next.hidden):has(.arrow.prev:not(.hidden)) .items {
+    mask-image: linear-gradient(90deg, transparent, black var(--padding), black calc(100%), transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black var(--padding), black calc(100%), transparent);
+}
+    section[ad-header] .arrow {
+        display: grid;
+        width: 1ch;
+        justify-content: center;
+        position: absolute;
+        left: -20px;
+        top: calc((var(--thumbnail-height, 100%) + 1.2rem + 21px) / 2);
+        font-size: 27px;
+        padding: 10px 12px;
+        border-radius: 5px;
+        font-family: var(--font-icon);
+        z-index: 1;
+        color: var(--foreground-description);
+        transform: translateY(-15%);
+        transition: 0.15s opacity, 0.15s background-color;
+        background-color: transparent;
+    }
+    section[ad-header] .arrow:hover {
+        background-color: var(--background-input-hover);
+    }
+    section[ad-header] .arrow:active {
+        background-color: var(--background-input-active);
+    }
+    section[ad-header] .arrow.next {
+        left: unset;
+        right: -20px;
+    }
+    section[ad-header] .arrow.hidden {
+        display: grid !important;
+        opacity: 0;
+        pointer-events: none;
+    }
+    section[ad-header] .items {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 250px;
+        gap: 10px 2em;
+        overflow-x: auto;
+        scrollbar-width: none;
+        scroll-behavior: smooth;
+        scroll-padding: var(--padding);
+        padding: 10px var(--padding);
+        margin: -10px calc(var(--padding) * -1);
+        scroll-snap-type: x proximity;
+    }
+    section[ad-header]:not(:has(.arrow)) .items {
+        display: grid;
+        grid-auto-flow: row;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 2em;
+    }
+        section[ad-header] .items .item { 
+            position: relative;
+            display: grid;
+            grid-auto-rows: max-content;
+            scroll-snap-align: start;
+            gap: 1em;
+            background-color: transparent;
+            padding: 10px;
+            margin: -10px;
+            border-radius: 10px;
+            transition: 0.15s background-color;
+        }
+        section[ad-header] .items .item:not(.disabled):hover { 
+            background-color: var(--background-list-even);
+        }
+        section[ad-header] .items .item:not(.disabled):active { 
+            background-color: var(--background-list-hover);
+        }
+            section[ad-header] .items .item img { 
+                width: 100%;
+                height: auto;
+                aspect-ratio: 16/9;
+                background: var(--overlay-7);
+                border-radius: 5px;
+                border: 1px solid var(--overlay-8);
+            }
+            section[ad-header] .items .item.disabled img { 
+                opacity: 0.5;
+            }
+            section[ad-header] .items .item .group { 
+                display: grid;
+            }
+            section[ad-header] .items .item.disabled .group {
+                opacity: 0.5;
+            }
+                section[ad-header] .items .item .group .primary { 
+                    font-size: 1.15em;
+                    font-weight: bold;
+                }
+                section[ad-header] .items .item .group .secondary { 
+                    font-size: 1.15em;
+                }
+                section[ad-header] .items .item .group :not(.primary):not(.secondary) { 
+                    color: var(--foreground-description);
+                }
+                section[ad-header] .items .item .group .details { 
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5em 1em;
+                    font-size: 0.85em;
+                    margin: 0.75em 0 0;
+                }
+                    section[ad-header] .items .item .group .details span { 
+                        display: grid;
+                        grid-auto-flow: column;
+                        gap: 0.5em;
+                    }
+                        section[ad-header] .items .item .group .details span::before { 
+                            content: attr(icon);
+                            font-family: var(--font-icon);
+                        }
+
+.list .stack.iconed > .icon:first-child {
+    text-align: center;
+}
+.list .stack .vertical {
+    display: grid;
+    padding: 0.25em 0;
+}
+    .list .stack .vertical span:first-child,
+    .list .stack.vertical span:first-child {
+        font-weight: bold;
+    }
+.list .stack .horizontal {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: auto max-content max-content max-content;
+}
+.list .stack label:has(> select) {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: auto max-content;
+    text-align: left;
+    opacity: 1;
+}
+    .list .stack label > select {
+        text-align-last: left
+    }
