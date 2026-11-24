@@ -1,3 +1,83 @@
+# Mahasigma Car Rental
+
+Sistem Informasi Mahasigma Car Rental merupakan aplikasi berbasis web untuk membantu pengelolaan operasional penyewaan mobil, termasuk manajemen cabang, pegawai, member, kendaraan, dan transaksi penyewaan.
+
+# Petunjuk Pengerjaan Proyek
+
+## 1. Tujuan Repository
+
+Repository ini digunakan sebagai tempat penyimpanan source code terpusat dan sarana kolaborasi tim dalam pengembangan Sistem Informasi Mahasigma Car Rental.
+
+Setiap anggota tim wajib mengikuti pembagian tugas, jadwal pengerjaan, dan work package (WP) yang telah ditetapkan dalam dokumen Perencanaan Proyek.
+
+## 2. Pembagian Tugas Tim
+
+| Nama | Peran | Tanggung Jawab |
+|---|---|---|
+| Michael Vian | Project Manager / System Analyst | Koordinasi tim, pemantauan jadwal, analisis kebutuhan, dan review proyek |
+| Agape Dimas | Programmer / Application Developer | Implementasi backend, frontend, database, dan integrasi aplikasi |
+| Kenneth Jonathan Harianto | Quality Assurance / Technical Writer | Pengujian sistem, review kualitas, dan dokumentasi teknis |
+
+## 3. Manajemen Task
+
+Pengerjaan proyek dikelola menggunakan GitHub Projects dengan metode Kanban.
+
+Setiap task dikelola berdasarkan work package dan sprint dalam dokumen perencanaan proyek.
+
+Status pengerjaan task mengikuti tahapan berikut:
+
+- Product Backlog: Daftar seluruh pekerjaan proyek.
+- To Do: Pekerjaan yang telah diprioritaskan dan siap dikerjakan.
+- In Progress: Pekerjaan yang sedang dilaksanakan.
+- Testing / Review: Pekerjaan yang sedang diuji atau ditinjau.
+- Done: Pekerjaan yang telah selesai dan memenuhi kriteria penerimaan.
+
+Setiap anggota bertanggung jawab memperbarui status task sesuai perkembangan pekerjaannya.
+
+## 4. Prosedur Kolaborasi GitHub
+
+Pengembangan dilakukan menggunakan branch agar perubahan dari setiap anggota dapat dikelola secara terpisah sebelum digabungkan ke branch utama (`main`).
+
+Alur pengerjaan:
+
+1. Mengambil perubahan terbaru dari branch `main`.
+2. Membuat branch baru sesuai work package yang dikerjakan.
+3. Melakukan perubahan source code sesuai tanggung jawab masing-masing.
+4. Melakukan commit dengan pesan yang menjelaskan perubahan.
+5. Mengirim branch ke repository GitHub menggunakan push.
+6. Membuat Pull Request untuk mengajukan penggabungan perubahan ke branch `main`.
+7. Anggota lain melakukan review terhadap perubahan.
+8. Menyelesaikan konflik atau revisi jika ditemukan.
+9. Melakukan merge setelah perubahan disetujui.
+
+Anggota tim dianjurkan tidak melakukan perubahan langsung pada branch `main` agar proses integrasi dan review dapat dikelola dengan baik.
+
+## 5. Ketentuan Commit
+
+Pesan commit harus menggambarkan perubahan yang dilakukan dan, bila relevan, mencantumkan nomor work package.
+
+Contoh:
+
+`[WP 3.1] Add role-based authentication`
+
+`[WP 3.2] Add branch management module`
+
+`[WP 3.5.2] Record testing results`
+
+## 6. Pengujian dan Penyelesaian Task
+
+Setelah implementasi selesai, perubahan harus diperiksa dan diuji oleh anggota yang bertanggung jawab pada Quality Assurance.
+
+Task dapat dipindahkan ke status Done setelah implementasi dan pengujian atau review yang diperlukan selesai.
+
+Hasil pengujian, catatan review, dan dokumentasi pendukung disimpan dalam repository sesuai kebutuhan proyek.
+
+---
+
+# Dokumentasi API
+
+Dokumentasi endpoint API tersedia pada bagian Routing di bawah ini.
+
 # Routing
 
 Struktur setiap path dalam daftar di sini kurang lebih 
